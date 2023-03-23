@@ -1,0 +1,15 @@
+plugins {
+	id 'java'
+}
+
+
+
+sourceCompatibility = '17'
+
+dependencies {
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

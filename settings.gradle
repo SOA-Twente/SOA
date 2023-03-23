@@ -1,0 +1,5 @@
+rootProject.name = 'SOA'
+
+include 'RegisterApp'
+include 'DirectMessageApp'
+include 'Utils'
