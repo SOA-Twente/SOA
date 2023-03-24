@@ -27,15 +27,16 @@ import java.util.List;
 public class indexController {
 
 
-    private static final String SEARCH_USERNAME = "https://localhost:8082/searchUsername/";
+    private static final String SEARCH_USERNAME = "http://localhost:8082/searchUsername/";
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     //Example of how to handle JWT. This is how you would get the user email from the JWT
-    @GetMapping("/searchUsername")
-    public List<String> searchUsername(@RequestParam String username) throws IOException {
+    @GetMapping("/search/{search}")
+    public String searchUsername(@PathVariable String search) throws IOException {
 
-        List<String> response = new RestTemplate().exchange(SEARCH_USERNAME + username, HttpMethod.GET, new HttpEntity<>("Search request"), new ParameterizedTypeReference<List<String>>() {
+        System.out.println("");
+        String response = new RestTemplate().exchange(SEARCH_USERNAME + search, HttpMethod.GET, new HttpEntity<>("Search request"), new ParameterizedTypeReference<String>() {
         }).getBody();
 
         System.out.println(response);
