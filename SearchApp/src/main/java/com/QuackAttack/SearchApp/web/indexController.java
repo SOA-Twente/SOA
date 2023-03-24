@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -33,56 +34,12 @@ public class indexController {
 
     //Example of how to handle JWT. This is how you would get the user email from the JWT
     @GetMapping("/search/{search}")
-    public String searchUsername(@PathVariable String search) throws IOException {
+    public ResponseEntity<Object> searchUsername(@PathVariable String search) throws IOException {
 
         System.out.println("");
-        String response = new RestTemplate().exchange(SEARCH_USERNAME + search, HttpMethod.GET, new HttpEntity<>("Search request"), new ParameterizedTypeReference<String>() {
+        Object response = new RestTemplate().exchange(SEARCH_USERNAME + search, HttpMethod.GET, new HttpEntity<>("Search request"), new ParameterizedTypeReference<Object>() {
         }).getBody();
-
-        System.out.println(response);
-        return response;
-
-//
-//        String urlString = "http://localhost:8081/searchusername/" + username;
-//        // Manual HTTP request
-//        StringBuffer content = new StringBuffer();
-//        HttpURLConnection con = null;
-//        String inputLine;
-//        try {
-//            // Build HTTP request
-//            URL url = new URL(urlString);
-//            con = (HttpURLConnection) url.openConnection();
-//            con.setRequestMethod("GET");
-//            con.setRequestProperty("Content-Type", "application/json");
-//
-//            // Transform the response InputStream into a String
-//            BufferedReader in = new BufferedReader(
-//                    new InputStreamReader(con.getInputStream()));
-//            while ((inputLine = in.readLine()) != null) {
-//                content.append(inputLine);
-//            }
-//            in.close();
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        } finally {
-//            if (con != null) {
-//                con.disconnect();
-//            }
-//        }
-//        return inputLine;
-
-
-        //make get request to localhost:8081/searchusername/username
-        //make simple get request
-
-
+        return ResponseEntity.ok(response);
     }
-
-    //GET rest request
-    // to localhost:8081/searchusername/username
-
-
-
-
 
 }
