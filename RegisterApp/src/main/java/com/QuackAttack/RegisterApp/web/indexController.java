@@ -2,6 +2,7 @@ package com.QuackAttack.RegisterApp.web;
 
 import com.QuackAttack.RegisterApp.objects.ResponseObject;
 import com.QuackAttack.RegisterApp.objects.UserData;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.Map;
 
 import static com.QuackAttack.RegisterApp.security.GTokenVerify.checkToken;
 
@@ -113,9 +115,9 @@ public class indexController {
 
     //TODO: TEST THIS
     @GetMapping("/searchUsername/{username}")
-    public List<String> searchUsername(@PathVariable String username) {
-        String sql = "SELECT username FROM users WHERE LOWER(username) LIKE ?";
-        List<String> user = jdbcTemplate.queryForList(sql, String.class, username + "%");
+    public List<Map<String, Object>> searchUsername(@PathVariable String username) {
+        String sql = "SELECT id, username, email FROM users WHERE LOWER(username) LIKE LOWER(?)";
+        List<Map<String, Object>> user = jdbcTemplate.queryForList(sql, username +"%");
         return user;
     }
 
