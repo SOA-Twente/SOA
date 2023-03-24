@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -24,6 +26,7 @@ public class IndexController {
 
     private static final String GET_FOLLOWING = "https://dummy.url/getfollowing";
     private static final String GET_QUACKS = "https://dummy.url//getQuacksByUserId/";
+    private static final int TIMELINE_MAX_SIZE = 10;
 
     @Autowired
     RestTemplate restTemplate;
@@ -61,11 +64,11 @@ public class IndexController {
         }
 
 
-        // construct timeline out of 10 most recent quacks (createdAt)
-        List<Quack> list = null;
+        // construct timeline, most recent sort (createdAt)
+        Collections.sort(quacks, Comparator.comparing(Quack::getCreatedAt).reversed());
+        List<Quack> timeline = quacks.subList(0, Math.min(quacks.size(), TIMELINE_MAX_SIZE));
 
-
-        return list;
+        return timeline;
     }
 
 
