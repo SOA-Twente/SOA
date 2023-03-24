@@ -2,12 +2,14 @@ package com.QuackAttack.FollowApp.web;
 
 import com.QuackAttack.FollowApp.objects.Following;
 import com.QuackAttack.FollowApp.objects.UserData;
+import com.QuackAttack.FollowApp.objects.followRequestForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -20,31 +22,28 @@ public class IndexController {
     private JdbcTemplate jdbcTemplate;
 
     @PostMapping("/follow")
-    public ResponseEntity<String> followUser(UserData sender, UserData target) {
+    public ResponseEntity<String> followUser(@RequestBody followRequestForm form) {
 
         // access following data from sender
         // add target to following data
         String sql = "INSERT INTO followings (user_id, following_id) VALUES (?,?)";
 
         // return result
-        int rows = jdbcTemplate.update(sql, sender.getId(), sender.getFollowing());
+        int rows = jdbcTemplate.update(sql, form.getSender(), form.getTarget());
         if (rows > 0) {
             //If row has been created
             System.out.println("A new row has been inserted.");
-            String successMessage = "Follow operation successful for " + sender.getUsername() + " to follow " + target.getUsername();
+            String successMessage = "Follow operation successful for sender " + form.getSender() + " to follow " + form.getTarget();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(successMessage);
         }
         else {
             //If row has not been created
             System.out.println("Something went wrong.");
-            String failMessage = "Follow operation failed for " + sender.getUsername() + " to follow " + target.getUsername();
+            String failMessage = "Follow operation failed for " + form.getSender() + " to follow " + form.getTarget();
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(failMessage);
-
         }
-
-
     }
 
     @GetMapping("/getFollowing")
