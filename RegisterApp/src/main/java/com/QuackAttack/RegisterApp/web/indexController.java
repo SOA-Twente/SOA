@@ -19,6 +19,7 @@ import static com.QuackAttack.RegisterApp.security.GTokenVerify.checkToken;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class indexController {
 
+    //TODO: TEST THIS
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -37,6 +38,7 @@ public class indexController {
         return "Hello World";
     }
 
+    //TODO: TEST THIS
     @GetMapping("/doesUserExist")
     public ResponseObject doesUserExist(@CookieValue String credentials) {
         String username;
@@ -58,6 +60,7 @@ public class indexController {
     }
 
 
+    //TODO: TEST THIS
     @PostMapping("/registerUser")
     public ResponseObject register(@CookieValue String credentials){
         String username;
@@ -85,6 +88,7 @@ public class indexController {
     }
 
 
+    //TODO: TEST THIS
     @GetMapping("/getUserData")
     public ResponseObject getUserData(@CookieValue String credentials){
         String username;
@@ -105,5 +109,15 @@ public class indexController {
             return new ResponseObject(true, false, "User does not exist");
         }
     }
+
+
+    //TODO: TEST THIS
+    @GetMapping("/searchUsername/{username}")
+    public List<String> searchUsername(@PathVariable String username) {
+        String sql = "SELECT username FROM users WHERE username LIKE ?";
+        List<String> user = jdbcTemplate.queryForList(sql, String.class, username + "%");
+        return user;
+    }
+
 
 }
