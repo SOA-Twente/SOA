@@ -1,17 +1,15 @@
 package com.QuackAttack.TimelineApp.web;
 
-import com.QuackAttack.TimelineApp.serviceTimeLine.Following;
-import com.QuackAttack.TimelineApp.serviceTimeLine.Quack;
-import com.QuackAttack.TimelineApp.serviceTimeLine.RequestFollowingForm;
-import com.QuackAttack.TimelineApp.serviceTimeLine.RequestTimelineForm;
-import org.apache.coyote.Response;
+import com.QuackAttack.TimelineApp.objects.Following;
+import com.QuackAttack.TimelineApp.objects.Quack;
+import com.QuackAttack.TimelineApp.objects.RequestFollowingForm;
+import com.QuackAttack.TimelineApp.objects.RequestTimelineForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
@@ -31,7 +29,7 @@ public class IndexController {
     @Autowired
     RestTemplate restTemplate;
 
-    @PostMapping("/timeline")
+    @GetMapping("/timeline")
     public List<Quack> timeline(@RequestBody RequestTimelineForm form) {
 
         // request to follow service, handle response which is a list of following objects

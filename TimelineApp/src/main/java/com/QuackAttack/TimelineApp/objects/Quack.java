@@ -1,4 +1,4 @@
-package com.QuackAttack.TimelineApp.serviceTimeLine;
+package com.QuackAttack.TimelineApp.objects;
 
 public class Quack {
     private int id;

@@ -17,6 +17,8 @@
             <option value="$PROJECT_DIR$/ProfileApp" />
             <option value="$PROJECT_DIR$/RegisterApp" />
             <option value="$PROJECT_DIR$/SearchApp" />
+            <option value="$PROJECT_DIR$/TimeLine_Consumer" />
+            <option value="$PROJECT_DIR$/TimeLine_Producer" />
             <option value="$PROJECT_DIR$/TimelineApp" />
             <option value="$PROJECT_DIR$/Utils" />
           </set>

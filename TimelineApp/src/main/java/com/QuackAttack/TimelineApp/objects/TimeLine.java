@@ -1,7 +1,6 @@
-package com.QuackAttack.TimelineApp.serviceTimeLine;
+package com.QuackAttack.TimelineApp.objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import javax.net.ssl.HttpsURLConnection;

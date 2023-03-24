@@ -1,4 +1,4 @@
-package com.QuackAttack.TimelineApp.serviceTimeLine;
+package com.QuackAttack.TimelineApp.objects;
 
 import lombok.Getter;
 import lombok.Setter;
