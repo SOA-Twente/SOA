@@ -1,3 +1,32 @@
+# Pull postgress image
+
+docker pull postgres
+
+# Run postgress image
+
+docker run --name profile_postgres -P --publish 127.0.0.1:5432:5432 -e POSTGRES_PASSWORD=root -d postgres
+
+- name of container is now profile_postgres, and the port is 5432 (default),
+- and the password is root, and the database is username postgres.
+
+# Connect to postgress
+
+docker exec -it profile_postgres psql -U postgres
+
+- connect to the container profile_postgres, and use the user postgres.
+
+# Create database
+
+CREATE DATABASE profileDatabase;
+
+- database name is now profileDatabase.
+
+# connect to profileDatabase
+
+\c profileDatabase
+
+# Create tables
+
 CREATE TABLE userData(
 id int NOT NULL,
 username varchar(255) NOT NULL,
