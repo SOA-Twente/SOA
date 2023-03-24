@@ -3,7 +3,7 @@ package com.QuackAttack.FollowApp.objects;
 import lombok.Getter;
 import lombok.Setter;
 
-public class followRequestForm {
+public class FollowUserForm {
 
     @Getter @Setter
     private int sender;

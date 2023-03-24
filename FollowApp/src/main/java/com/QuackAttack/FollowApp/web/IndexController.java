@@ -1,8 +1,8 @@
 package com.QuackAttack.FollowApp.web;
 
+import com.QuackAttack.FollowApp.objects.FollowUserForm;
 import com.QuackAttack.FollowApp.objects.Following;
-import com.QuackAttack.FollowApp.objects.UserData;
-import com.QuackAttack.FollowApp.objects.followRequestForm;
+import com.QuackAttack.FollowApp.objects.RequestFollowingForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ public class IndexController {
     private JdbcTemplate jdbcTemplate;
 
     @PostMapping("/follow")
-    public ResponseEntity<String> followUser(@RequestBody followRequestForm form) {
+    public ResponseEntity<String> followUser(@RequestBody FollowUserForm form) {
 
         // access following data from sender
         // add target to following data
@@ -47,8 +47,10 @@ public class IndexController {
     }
 
     @GetMapping("/getFollowing")
-    public List<Following> followingList(int user_id) {
-        String sql = "SELECT * FROM followings WHERE user_id = " + user_id;
+    public List<Following> followingList(@RequestBody RequestFollowingForm form) {
+
+        // select from the database
+        String sql = "SELECT * FROM followings WHERE user_id = " + form.getUser_id();
 
         List<Following> list = jdbcTemplate.query(sql, new BeanPropertyRowMapper(Following.class));
 
