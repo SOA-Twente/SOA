@@ -1,6 +1,6 @@
 # SOA
 
-Software developped for the course of Service-Oriented-Architecture of the University of Twente.
+Software developed for the course of Service-Oriented-Architecture of the University of Twente.
 
 # Goal
 
