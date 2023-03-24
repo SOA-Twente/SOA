@@ -20,19 +20,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // producer dependencies
-    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.14.2'
-    // https://mvnrepository.com/artifact/org.javassist/javassist
-    implementation group: 'org.javassist', name: 'javassist', version: '3.15.0-GA'
-    // https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api
-    implementation group: 'javax.xml.bind', name: 'jaxb-api', version: '2.2.4'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'com.rabbitmq:amqp-client:5.12.0'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.projectlombok:lombok:1.18.22'
-    implementation 'org.projectlombok:lombok:1.18.22'
-    implementation 'org.projectlombok:lombok:1.18.22'
     implementation 'org.projectlombok:lombok:1.18.22'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
