@@ -23,6 +23,7 @@ public class indexController {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    //Example of how to handle JWT. This is how you would get the user email from the JWT
     @GetMapping("/")
     public String home(@CookieValue String credentials){
         System.out.println(credentials);
