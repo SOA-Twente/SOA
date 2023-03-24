@@ -41,5 +41,4 @@ public class indexController {
         }).getBody();
         return ResponseEntity.ok(response);
     }
-
 }
