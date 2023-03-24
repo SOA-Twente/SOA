@@ -1,11 +1,14 @@
 package com.QuackAttack.SearchApp.web;
 
-import com.QuackAttack.RegisterApp.objects.ResponseObject;
-import com.QuackAttack.RegisterApp.objects.UserData;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,19 +20,27 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
-import static com.QuackAttack.RegisterApp.security.GTokenVerify.checkToken;
 
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class indexController {
 
+
+    private static final String SEARCH_USERNAME = "https://localhost:8082/searchUsername/";
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     //Example of how to handle JWT. This is how you would get the user email from the JWT
-//    @GetMapping("/searchUsername")
-//    public List<String> searchUsername(@RequestParam String username) throws IOException {
+    @GetMapping("/searchUsername")
+    public List<String> searchUsername(@RequestParam String username) throws IOException {
+
+        List<String> response = new RestTemplate().exchange(SEARCH_USERNAME + username, HttpMethod.GET, new HttpEntity<>("Search request"), new ParameterizedTypeReference<List<String>>() {
+        }).getBody();
+
+        System.out.println(response);
+        return response;
+
 //
 //        String urlString = "http://localhost:8081/searchusername/" + username;
 //        // Manual HTTP request

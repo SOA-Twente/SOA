@@ -115,7 +115,7 @@ public class indexController {
     }
 
     //Need id of user to add follower to and String of description to add
-    @PostMapping("/addDescription/")
+    @PostMapping("/addDescription")
     public UserData addDescription( @RequestBody UserData message){
         //Change value of description in userdata for certain user.
         String sql = "UPDATE userdata SET description = ? WHERE id = ?";

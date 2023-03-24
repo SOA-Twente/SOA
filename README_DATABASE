@@ -24,4 +24,9 @@ retweet_of_quack_id int,
 created_at TIMESTAMP DEFAULT NOW(),
 );
 
-CREATE TABLE
+CREATE TABLE users(
+id SERIAL PRIMARY KEY,
+username varchar(255) NOT NULL,
+email varchar(255) NOT NULL,
+password varchar(255),
+);

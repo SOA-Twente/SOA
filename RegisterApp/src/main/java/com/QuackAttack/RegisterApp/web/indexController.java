@@ -114,7 +114,7 @@ public class indexController {
     //TODO: TEST THIS
     @GetMapping("/searchUsername/{username}")
     public List<String> searchUsername(@PathVariable String username) {
-        String sql = "SELECT username FROM users WHERE username LIKE ?";
+        String sql = "SELECT username FROM users WHERE LOWER(username) LIKE ?";
         List<String> user = jdbcTemplate.queryForList(sql, String.class, username + "%");
         return user;
     }
