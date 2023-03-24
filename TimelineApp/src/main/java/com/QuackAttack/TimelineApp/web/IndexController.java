@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 public class IndexController {
 
     private static final String GET_FOLLOWING = "https://dummy.url/getfollowing";
+    private static final String GET_QUACKS = "https://dummy.url//getQuacksByUserId/";
 
     @Autowired
     RestTemplate restTemplate;
@@ -41,7 +43,22 @@ public class IndexController {
 
         List<Following> followings = response.getBody();
 
-        // request to profile for quacks for each in the list of followings
+        // request to profile for quacks for each in the list of followings, add them to this list
+        List<Quack> quacks = new ArrayList<>();
+
+        for (Following following : followings) {
+
+            // GET to post a message service to retrieve the quacks per following
+            ResponseEntity<List<Quack>> responseQuacks = restTemplate.exchange(
+                    GET_QUACKS + following.getID(),
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Quack>>() {}
+            );
+
+            List<Quack> followingQuack = responseQuacks.getBody();
+            quacks.addAll(followingQuack);
+        }
 
 
         // construct timeline out of 10 most recent quacks (createdAt)
