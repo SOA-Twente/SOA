@@ -1,0 +1,7 @@
+.gradle
+.idea
+/SearchApp/build/
+/RegisterApp/build/
+/ProfileApp/build/
+/PostMessageApp/build/
+/DirectMessageApp/build/
