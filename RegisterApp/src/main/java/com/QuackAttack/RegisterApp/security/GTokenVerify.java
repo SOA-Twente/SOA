@@ -44,8 +44,7 @@ public class GTokenVerify {
             // ...
 
         } else {
-            System.out.println("Invalid ID token.");
-            return "Invalid ID token.";
+            throw new GeneralSecurityException("Invalid ID token.");
         }
     }
 
