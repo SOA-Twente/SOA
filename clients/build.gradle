@@ -1,0 +1,17 @@
+plugins {
+	id 'java'
+}
+
+
+
+sourceCompatibility = '17'
+
+dependencies {
+	implementation 'io.github.openfeign:feign-core:12.2'
+	implementation 'io.github.openfeign:feign-httpclient:12.2'
+	implementation 'io.github.openfeign:feign-gson:12.2'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
