@@ -26,6 +26,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	implementation project(':clients')
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	//How to implement other project dependency

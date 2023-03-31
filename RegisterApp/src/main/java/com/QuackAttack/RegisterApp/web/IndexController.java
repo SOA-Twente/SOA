@@ -1,14 +1,15 @@
 package com.QuackAttack.RegisterApp.web;
 
-import com.QuackAttack.RegisterApp.objects.ResponseObject;
+import com.QuackAttack.RegisterApp.DoesUserExistResult;
+import com.QuackAttack.RegisterApp.SearchResults;
+import com.QuackAttack.RegisterApp.auth.TokenVerifier;
+import com.QuackAttack.RegisterApp.database.RegisterAppDb;
 import com.QuackAttack.RegisterApp.objects.UserData;
 import com.google.gson.Gson;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -16,15 +17,19 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 
-import static com.QuackAttack.RegisterApp.security.GTokenVerify.checkToken;
-
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
-public class indexController {
+public class IndexController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private RegisterAppDb registerAppDb;
+    @Autowired
+    private TokenVerifier verifier;
+
     private static final Gson gson = new Gson();
 
     //Example of how to handle JWT. This is how you would get the user email from the JWT
@@ -32,7 +37,7 @@ public class indexController {
     public String home(@CookieValue String credentials){
         System.out.println(credentials);
         try {
-            System.out.println(checkToken(credentials));
+            System.out.println(verifier.checkToken(credentials));
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
         } catch (IOException e) {
@@ -42,58 +47,53 @@ public class indexController {
         return gson.toJson("Hello World");
     }
 
+
     //TODO: TEST THIS
     @GetMapping("/doesUserExist")
-    public ResponseEntity doesUserExist(@CookieValue String credentials) {
+    public ResponseEntity<DoesUserExistResult> doesUserExist(@CookieValue String credentials) {
         String username;
         try {
-            username = checkToken(credentials);
-        } catch (GeneralSecurityException e) {
+            username = verifier.checkToken(credentials);
+        } catch (GeneralSecurityException | IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
 
-            return ResponseEntity.badRequest().body(gson.toJson("Invalid JWT"));
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(gson.toJson("Invalid JWT"));
-        }
-        String sql = "SELECT * FROM users WHERE username = ?";
-        List<UserData> user = jdbcTemplate.query(sql,
-                BeanPropertyRowMapper.newInstance(UserData.class), username);
-        if (user.size() > 0) {
-            return ResponseEntity.ok().body(gson.toJson("User already exists"));
-        } else {
-            return ResponseEntity.ok().body(gson.toJson("User does not exist"));
-        }
+        List<UserData> user = registerAppDb.getUsers(username);
+        return ResponseEntity.ok().body(new DoesUserExistResult(!user.isEmpty()));
     }
 
-
+    enum RegisterResultEnum {
+        USER_EXISTS,
+        USER_REGISTERED,
+        USER_NOT_REGISTERED
+    }
+    record RegisterResult(RegisterResultEnum result) { }
     //TODO: TEST THIS
     @PostMapping("/registerUser")
-    public ResponseEntity register(@CookieValue String credentials){
+    public ResponseEntity<RegisterResult> register(@CookieValue String credentials){
         String username;
         try {
-            username = checkToken(credentials);
-        } catch (GeneralSecurityException e) {
-            return ResponseEntity.badRequest().body(gson.toJson("Invalid JWT"));
-        } catch (IOException e) {
-            return ResponseEntity.badRequest().body(gson.toJson("Invalid JWT"));
+            username = verifier.checkToken(credentials);
+        } catch (GeneralSecurityException | IOException e) {
+            return ResponseEntity.badRequest().build();
         }
 
-        String sql = "SELECT * FROM users WHERE username = ?";
-        List<Map<String, Object>> user = jdbcTemplate.queryForList(sql, username);
-        if (user.size() > 0) {
+        List<UserData> users = registerAppDb.getUsers(username);
+        if (users.size() > 0) {
             System.out.println("User already exists");
-            return ResponseEntity.ok().body(gson.toJson("User already exists"));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_EXISTS));
         }
 
         //postgres insert into userdata
-        sql= "INSERT INTO users (username, email) VALUES (?, ?)";
+        String sql = "INSERT INTO users (username, email) VALUES (?, ?)";
         int rows = jdbcTemplate.update(sql, username, username);
         if (rows > 0) {
             //If row has been created
-            return ResponseEntity.ok().body(gson.toJson("User has been registered"));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_REGISTERED));
         }
         else {
             //If row has not been created
-            return ResponseEntity.internalServerError().body(gson.toJson("User has not been registered"));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_NOT_REGISTERED));
 
         }
     }
@@ -104,7 +104,7 @@ public class indexController {
     public ResponseEntity getUserData(@CookieValue String credentials){
         String username;
         try {
-            username = checkToken(credentials);
+            username = verifier.checkToken(credentials);
         } catch (GeneralSecurityException e) {
             return ResponseEntity.badRequest().body(gson.toJson("Invalid JWT"));
         } catch (IOException e) {
@@ -126,10 +126,17 @@ public class indexController {
      * @return List of users
      */
     @GetMapping("/searchUsername/{username}")
-    public ResponseEntity searchUsername(@PathVariable String username) {
+    public ResponseEntity<SearchResults> searchUsername(@PathVariable String username) {
         String sql = "SELECT id, username, email FROM users WHERE LOWER(username) LIKE LOWER(?)";
-        List<Map<String, Object>> user = jdbcTemplate.queryForList(sql, username +"%");
-        return ResponseEntity.ok(gson.toJson(user));
+        List<SearchResults.UserData> user = jdbcTemplate.queryForList(sql, username +"%")
+                .stream()
+                .map(row -> new SearchResults.UserData(
+                        (int) row.get("id"),
+                        (String) row.get("username"),
+                        (String) row.get("email")))
+                .toList();
+
+        return ResponseEntity.ok(new SearchResults(user));
     }
 
 

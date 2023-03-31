@@ -1,5 +1,7 @@
 package com.QuackAttack.RegisterApp.objects;
 
+import java.util.Objects;
+
 public class UserData {
 
 

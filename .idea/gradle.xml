@@ -21,6 +21,7 @@
             <option value="$PROJECT_DIR$/Timeline-Producer" />
             <option value="$PROJECT_DIR$/TimelineApp" />
             <option value="$PROJECT_DIR$/Utils" />
+            <option value="$PROJECT_DIR$/clients" />
           </set>
         </option>
       </GradleProjectSettings>
