@@ -12,4 +12,8 @@ public class Following {
     private int user_ID;
     @Getter @Setter
     private int following_ID;
+
+    public int getID() {
+        return this.ID;
+    }
 }

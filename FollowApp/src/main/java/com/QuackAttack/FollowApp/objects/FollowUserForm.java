@@ -5,10 +5,18 @@ import lombok.Setter;
 
 public class FollowUserForm {
 
-    @Getter @Setter
+    @Setter
     private int sender;
-
-    @Getter @Setter
+    @Setter
     private int target;
+
+    public int getSender() {
+        return this.sender;
+    }
+
+    public int getTarget() {
+        return this.target;
+    }
+
 
 }

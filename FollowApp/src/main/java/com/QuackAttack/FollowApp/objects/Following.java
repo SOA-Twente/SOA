@@ -12,4 +12,11 @@ public class Following {
     @Getter @Setter
     private int following_ID;
 
+    public int getID() {
+        return this.ID;
+    }
+    public int getUser_ID() {
+        return this.user_ID;
+    }
+
 }
