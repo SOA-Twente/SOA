@@ -32,14 +32,14 @@ id int NOT NULL,
 username varchar(255) NOT NULL,
 description varchar(300),
 followers int,
-tags varchar[]
+tags varchar[],
 PRIMARY KEY (id)
 );
 
 CREATE TABLE followings(
 id SERIAL PRIMARY KEY,
 user_id int NOT NULL,
-following_id int NOT NULL,
+following_id int NOT NULL
 );
 
 CREATE TABLE quacks(
@@ -50,12 +50,12 @@ is_reply boolean,
 reply_to_quack_id int,
 is_retweet boolean,
 retweet_of_quack_id int,
-created_at TIMESTAMP DEFAULT NOW(),
+created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE users(
 id SERIAL PRIMARY KEY,
 username varchar(255) NOT NULL,
 email varchar(255) NOT NULL,
-password varchar(255),
+password varchar(255)
 );
