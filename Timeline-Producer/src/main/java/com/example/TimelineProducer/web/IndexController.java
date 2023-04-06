@@ -1,13 +1,15 @@
 package com.example.TimelineProducer.web;
 
-import com.example.TimelineProducer.service.TimelineProducerService;
+import com.example.TimelineProducer.Producer.TimelineProducerService;
 import com.example.TimelineProducer.objects.RequestTimelineForm;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Slf4j
 public class IndexController {
 
     final
@@ -17,10 +19,19 @@ public class IndexController {
         this.timelineProducerService = timelineProducerService;
     }
 
+    /**
+     * Receives a request and sends this to the producer.
+     * @param requestTimelineForm to be sent to the producer.
+     * @return an ok response entity or an internal server error response entity.
+     */
     @PostMapping("/timeline")
-    public void produceTimeline(@RequestBody RequestTimelineForm requestTimelineForm) {
-        timelineProducerService.produceTimeline(requestTimelineForm);
+    public ResponseEntity requestTimeline(@RequestBody RequestTimelineForm requestTimelineForm) {
+        try {
+            timelineProducerService.addQueue(requestTimelineForm);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Failed in requesting the timeline: " + e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
-
-
 }

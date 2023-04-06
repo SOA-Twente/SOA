@@ -107,8 +107,6 @@ public class IndexController {
 
     }
 
-
-
     public List<Conversation> doesConvoExists(GetConvoRequest request) {
 
         String sqlIfExist = "SELECT convoID FROM conversations WHERE " +
