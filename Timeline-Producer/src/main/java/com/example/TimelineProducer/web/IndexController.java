@@ -1,6 +1,6 @@
 package com.example.TimelineProducer.web;
 
-import com.example.TimelineProducer.Producer.TimelineProducerService;
+import com.example.TimelineProducer.producer.TimelineProducerService;
 import com.example.TimelineProducer.objects.RequestTimelineForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class IndexController {
 
-    final
-    TimelineProducerService timelineProducerService;
+    private TimelineProducerService timelineProducerService;
 
     public IndexController(TimelineProducerService timelineProducerService) {
         this.timelineProducerService = timelineProducerService;

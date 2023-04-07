@@ -1,29 +1,29 @@
-package com.example.TimelineProducer.Producer;
+package com.QuackAttack.DirectMessageProducer.producer;
 
-import com.example.TimelineProducer.objects.RequestTimelineForm;
+import com.QuackAttack.DirectMessageApp.objects.GetConvoRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
-// sends the request from the UI to the message queue, aka produces the tasks
 @Component
 @Slf4j
-public class TimelineProducerService {
+public class DirectMessageProducerService {
 
     @Autowired
     JmsTemplate jmsTemplate;
 
-    //TODO give the actual queue name in app properties
+    // TODO give the actual queue name in app properties
     @Value("${active-mq.queue}")
     private String queue;
+
 
     /**
      * addQueue will send a message to the specified message queue.
      * @param request is received from the UI, this is a RequestTimelineForm
      */
-    public void addQueue(RequestTimelineForm request) {
+    public void addQueue(GetConvoRequest request) {
         try {
             log.info("Attempting to send request to queue:" + queue);
 
@@ -32,4 +32,5 @@ public class TimelineProducerService {
             log.error("Received Exception during sending to queue: " + e);
         }
     }
+
 }

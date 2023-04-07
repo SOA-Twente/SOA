@@ -1,4 +1,4 @@
-package com.example.TimelineProducer.Producer;
+package com.example.TimelineProducer.producer;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.apache.activemq.ActiveMQConnectionFactory;
