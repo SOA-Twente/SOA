@@ -11,6 +11,8 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/DirectMessage-Consumer" />
+            <option value="$PROJECT_DIR$/DirectMessage-Producer" />
             <option value="$PROJECT_DIR$/DirectMessageApp" />
             <option value="$PROJECT_DIR$/FollowApp" />
             <option value="$PROJECT_DIR$/PostMessageApp" />

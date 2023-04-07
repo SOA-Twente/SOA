@@ -56,7 +56,7 @@ public class TimelineConsumer {
         // sort the quacks with some method (currently sorted at time, createdAt field of quacks)
         Collections.sort(listQuacks, Comparator.comparing(Quack::getCreatedAt));
 
-        // TODO send the quacks back to the requester
+        // TODO send the quacks back to the requester, adjust the RequestTimelineForm with the correct info
 
     }
 

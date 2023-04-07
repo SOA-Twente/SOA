@@ -1,0 +1,14 @@
+CREATE TABLE Conversations (
+  convoID SERIAL PRIMARY KEY,
+  UserInitiator INT,
+  UserReceiver INT,
+  CONSTRAINT uc_user_initiator_user_receiver UNIQUE(UserInitiator, UserReceiver)
+);
+CREATE TABLE Messages (
+  ID SERIAL PRIMARY KEY,
+  ConvoID INT,
+  Sender INT,
+  Receiver INT,
+  message TEXT,
+  CONSTRAINT fk_conversations FOREIGN KEY (ConvoID) REFERENCES Conversations(convoID)
+);
