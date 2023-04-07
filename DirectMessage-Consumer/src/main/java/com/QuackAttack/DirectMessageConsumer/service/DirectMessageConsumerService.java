@@ -4,8 +4,6 @@ import com.QuackAttack.DirectMessageConsumer.objects.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -34,7 +32,7 @@ public class DirectMessageConsumerService {
      * if a conversation with the 2 users already exists, if so, it returns a message that the conversation already
      * exists. Else, it will create a new entry in the database for the conversation and return a message that the
      * conversation has been created.
-     * @param request
+     * @param request it receives from the message queue.
      */
     @JmsListener(destination = "${active-mq.create-conversation-queue}")
     public void createConvo(GetConvoRequest request) {
@@ -62,6 +60,7 @@ public class DirectMessageConsumerService {
 
     }
 
+
     /**
      * This JmsListener listens on the "get conversation" queue. It takes requests from that queue and first checks
      * if the conversations exists, if it exists, it will then select the messages from the database with a matching
@@ -84,6 +83,7 @@ public class DirectMessageConsumerService {
                         , new MessageRowMapper()
                         , new Object[]{conversationID});
 
+                // TODO return the messages to the original requester
             } catch (DataAccessException e) {
                 log.error("Error querying messages from request init:" + request.getInitiator()
                         + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
@@ -98,15 +98,27 @@ public class DirectMessageConsumerService {
     // TODO specify the send message message queue
     @JmsListener(destination = "${active-mq.send-msg-queue}")
     public void sendMsg(MessageRequest request) {
+        String sql = "INSERT INTO messages (convoID, sender, receiver, message) VALUES ( ?, ?, ?, ?)";
 
+        try {
+            int rows = jdbcTemplate.update(sql, request.getConvoID(), request.getSender(), request.getReceiver(), request.getMessage());
+            if (rows > 0) {
+                // message was send successfully
+                log.info("message was sent");
+            } else {
+                log.error("message was not sent, error location is directquack");
+            }
+
+        } catch (DataAccessException e) {
+            log.error("Error sending the message for request: " + request.getReceiver() + ", sender: " + request.getSender()
+                    + ", receiver: " + request.getReceiver() + ", message : " + request.getMessage());
+        }
     }
-
-
 
     /**
      * Help function to check if the conversation already exists in the database.
      * @param request for a conversation with a conversation ID.
-     * @return a list
+     * @return a list containing the conversation.
      */
     public List<Conversation> doesConvoExists(GetConvoRequest request) {
 
