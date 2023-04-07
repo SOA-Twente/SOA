@@ -1,4 +1,4 @@
-package com.QuackAttack.DirectMessageApp.producer;
+package com.QuackAttack.DirectMessageProducer.producer;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.beans.factory.annotation.Value;
