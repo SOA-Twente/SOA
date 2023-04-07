@@ -1,13 +1,13 @@
-package com.QuackAttack.DirectMessageApp;
+package com.QuackAttack.DirectMessageConsumer;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class DirectMessageAppApplication {
+public class DirectMessageConsumerApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DirectMessageAppApplication.class, args);
+		SpringApplication.run(DirectMessageConsumerApplication.class, args);
 	}
 
 }

@@ -16,15 +16,14 @@ public class IndexController {
     private DirectMessageProducerService producerService;
 
     /**
-     * Receives a request to get a conversation, sends it to the message queue where it can
-     * be consumed and returned.
-     * @param request for a conversation.
-     * @return a http ok if succeeds, else error.
+     * Takes a conversation request from the message queue and consumes it.
+     * @param request from the message queue.
+     * @return // TODO implement some identifier to send the information back to
      */
     @GetMapping("/getConvo")
-    public ResponseEntity requestConvo(@RequestBody GetConvoRequest request) {
+    public ResponseEntity sendGetConversation(@RequestBody GetConvoRequest request) {
         try {
-            producerService.addQueue(request);
+            producerService.addGetConvoQueue(request);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             log.error("Failed in requesting the timeline: " + e);

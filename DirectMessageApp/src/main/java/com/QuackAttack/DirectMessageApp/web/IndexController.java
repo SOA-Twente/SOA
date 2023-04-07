@@ -69,7 +69,7 @@ public class IndexController {
                 return messages;
             } catch (DataAccessException e) {
                 System.err.println("Error querying messages from request init:" + request.getInitiator()
-                        + ", rece: " + request.getReceiver() + " and convoID: " + conversationID);
+                        + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
                 throw new RuntimeException(e);
             }
 

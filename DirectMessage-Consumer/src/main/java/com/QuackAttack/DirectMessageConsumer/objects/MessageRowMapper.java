@@ -1,4 +1,4 @@
-package com.QuackAttack.DirectMessageApp.objects;
+package com.QuackAttack.DirectMessageConsumer.objects;
 
 import org.springframework.jdbc.core.RowMapper;
 

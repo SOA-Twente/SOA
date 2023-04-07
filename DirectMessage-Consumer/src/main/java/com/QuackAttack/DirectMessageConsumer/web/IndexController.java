@@ -1,6 +1,6 @@
-package com.QuackAttack.DirectMessageApp.web;
+package com.QuackAttack.DirectMessageConsumer.web;
 
-import com.QuackAttack.DirectMessageApp.objects.*;
+import com.QuackAttack.DirectMessageConsumer.objects.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;

@@ -23,7 +23,7 @@ public class DirectMessageProducerService {
      * addQueue will send a message to the specified message queue.
      * @param request is received from the UI, this is a RequestTimelineForm
      */
-    public void addQueue(GetConvoRequest request) {
+    public void addGetConvoQueue(GetConvoRequest request) {
         try {
             log.info("Attempting to send request to queue:" + queue);
 

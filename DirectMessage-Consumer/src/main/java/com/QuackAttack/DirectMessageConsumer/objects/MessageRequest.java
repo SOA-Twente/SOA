@@ -1,17 +1,15 @@
-package com.QuackAttack.DirectMessageApp.objects;
+package com.QuackAttack.DirectMessageConsumer.objects;
 
 import lombok.Getter;
 import lombok.Setter;
 
-public class Message {
-    @Getter @Setter
-    private int ID;
+public class MessageRequest {
     @Getter @Setter
     private int convoID;
     @Getter @Setter
-    private String sender;
+    private int sender;
     @Getter @Setter
-    private String receiver;
+    private int receiver;
     @Getter @Setter
     private String message;
 }
