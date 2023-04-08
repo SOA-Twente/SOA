@@ -44,7 +44,7 @@ following_id int NOT NULL
 
 CREATE TABLE quacks(
 id SERIAL PRIMARY KEY,
-user_id int NOT NULL,
+user_id varchar NOT NULL,
 quack varchar(300) NOT NULL,
 is_reply boolean,
 reply_to_quack_id int,

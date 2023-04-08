@@ -1,14 +1,18 @@
 package com.QuackAttack.PostMessageApp.web;
 
 
-import com.QuackAttack.PostMessageApp.objects.Quack;
+import com.QuackAttack.PostMessageApp.auth.TokenVerifier;
+import com.QuackAttack.RegisterApp.Quack;
+import com.QuackAttack.RegisterApp.QuackSearch;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.List;
 
 
@@ -18,6 +22,9 @@ public class IndexController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private TokenVerifier verifier;
 
     @GetMapping("/")
     public String home(){
@@ -46,11 +53,27 @@ public class IndexController {
 //    }
 
 
-    @PostMapping("/postQuack")
-    public Quack postMessage(@RequestBody Quack message){
-        String sql = "INSERT INTO quacks (user_id, message, is_reply, reply_to_quack_id, is_retweet, retweet_to_quack_id) VALUES (?,?, ?, ?, ?, ?)";
+//    Expected json:
+//    {
+//        "quack": "Hello World",
+//        "is_reply": false,
+//        "reply_to_quack_id": 0,
+//        "is_retweet": false,
+//        "retweet_of_quack_id": 0
+//    }
 
-        int rows = jdbcTemplate.update(sql, message.getUserId(), message.getMessage(), message.isReply(), message.getRepliedQuackId(), message.isRetweet(), message.getRetweetedQuackId());
+    @PostMapping("/postQuack")
+    public ResponseEntity postMessage(@CookieValue String credentials,@RequestBody Quack message){
+
+        String username;
+        try {
+            username = verifier.checkToken(credentials);
+        } catch (GeneralSecurityException | IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        String sql = "INSERT INTO quacks (user_id, quack, is_reply, reply_to_quack_id, is_retweet, retweet_of_quack_id) VALUES (?,?, ?, ?, ?, ?)";
+
+        int rows = jdbcTemplate.update(sql, username, message.getQuack(), message.isReply(), message.getReply_to_quack_id(), message.isIs_retweet(), message.getRetweet_of_quack_id());
         if (rows > 0) {
             //If row has been created
             System.out.println("A new row has been inserted.");
@@ -59,6 +82,20 @@ public class IndexController {
             //If row has not been created
             System.out.println("Something went wrong.");
         }
-        return message;
+        return ResponseEntity.ok("message");
     }
+
+    @GetMapping("/searchQuacks/{search}")
+    public List<QuackSearch> searchQuacks(@PathVariable String search, Model model){
+        String sql = "SELECT user_id,quack FROM quacks WHERE LOWER(quack) LIKE LOWER(?)";
+        List<QuackSearch> user = jdbcTemplate.queryForList(sql, "%" + search +"%")
+                .stream()
+                .map(row -> new QuackSearch(
+                        (String) row.get("user_id"),
+                        (String) row.get("quack")))
+                .toList();
+        return user;
+    }
+
+
 }
