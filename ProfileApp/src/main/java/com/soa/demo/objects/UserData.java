@@ -1,6 +1,9 @@
 package com.soa.demo.objects;
 
 
+import org.postgresql.jdbc.PgArray;
+
+import java.util.List;
 
 public class UserData {
 
@@ -9,10 +12,10 @@ public class UserData {
     private String description;
     private int followers;
     private int following;
-    private String tags;
+    private PgArray tags;
 
 
-    public UserData(int id, String username, String description, int followers, int following, String tags) {
+    public UserData(int id, String username, String description, int followers, int following, PgArray tags) {
         this.id = id;
         this.username = username;
         this.description = description;
@@ -64,11 +67,11 @@ public class UserData {
         this.following = following;
     }
 
-    public String getTags() {
+    public PgArray getTags() {
         return tags;
     }
 
-    public void setTags(String tags) {
+    public void setTags(PgArray tags) {
         this.tags = tags;
     }
 }

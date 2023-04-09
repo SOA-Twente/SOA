@@ -4,6 +4,7 @@ import com.QuackAttack.RegisterApp.UserProfile;
 import com.soa.demo.auth.TokenVerifier;
 import com.soa.demo.objects.Message;
 import com.soa.demo.objects.UserData;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -14,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.sql.SQLException;
 import java.util.List;
 
 import static com.soa.demo.security.GTokenVerify.checkToken;
@@ -42,6 +44,18 @@ public class indexController {
         }
 
         return "Hello World";
+    }
+
+    record userDataRecord(int id, String username, String description, int followers, int following, String[] tags) {};
+    @GetMapping("/getUserData/{username}")
+    public userDataRecord getUserData(Model model, @PathVariable String username) throws SQLException {
+        String sql = "SELECT * FROM userdata WHERE LOWER(username) = LOWER(?)";
+
+        UserData userData = jdbcTemplate.queryForObject(sql,
+                BeanPropertyRowMapper.newInstance(UserData.class), username);
+        String[] tags = (String[])userData.getTags().getArray();
+
+        return new userDataRecord(userData.getId(), userData.getUsername(), userData.getDescription(), userData.getFollowers(), userData.getFollowing(), tags);
     }
 
     @GetMapping("/getQuacks")
