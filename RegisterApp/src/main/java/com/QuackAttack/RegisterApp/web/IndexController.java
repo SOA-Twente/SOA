@@ -1,14 +1,12 @@
 package com.QuackAttack.RegisterApp.web;
 
-import com.QuackAttack.RegisterApp.DoesUserExistResult;
-import com.QuackAttack.RegisterApp.SearchResults;
+import com.QuackAttack.RegisterApp.*;
 import com.QuackAttack.RegisterApp.auth.TokenVerifier;
 import com.QuackAttack.RegisterApp.database.RegisterAppDb;
 import com.QuackAttack.RegisterApp.objects.UserData;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +27,10 @@ public class IndexController {
     private RegisterAppDb registerAppDb;
     @Autowired
     private TokenVerifier verifier;
+
+    private ProfileAppClient profileAppClient = ProfileAppClient.create();
+
+
 
     private static final Gson gson = new Gson();
 
@@ -89,6 +91,12 @@ public class IndexController {
         int rows = jdbcTemplate.update(sql, username, username);
         if (rows > 0) {
             //If row has been created
+
+            //add profile
+            String sql2 = "SELECT id FROM users WHERE username = ?";
+            int id = jdbcTemplate.queryForObject(sql2, Integer.class, username);
+            profileAppClient.addUserProfile(new UserProfile(credentials, id));
+
             return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_REGISTERED));
         }
         else {

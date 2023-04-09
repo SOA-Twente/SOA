@@ -1,8 +1,11 @@
 package com.soa.demo.web;
 
+import com.QuackAttack.RegisterApp.UserProfile;
+import com.soa.demo.auth.TokenVerifier;
 import com.soa.demo.objects.Message;
 import com.soa.demo.objects.UserData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +25,9 @@ public class indexController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private TokenVerifier verifier;
 
     //Example of how to handle JWT. This is how you would get the user email from the JWT
     @GetMapping("/")
@@ -134,10 +140,17 @@ public class indexController {
 
     //Need id of user to add follower to and Username to add
     @PostMapping("/addUserProfile")
-    public UserData addUser(@RequestBody UserData user){
+    public ResponseEntity<Object> addUser(@RequestBody UserProfile userProfile){
         String sql = "INSERT INTO userdata (id, username, followers) VALUES (?,?, ?)";
 
-        int rows = jdbcTemplate.update(sql, user.getId(), user.getUsername(), 0);
+        String username;
+        try {
+            username = verifier.checkToken(userProfile.credentials());
+        } catch (GeneralSecurityException | IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        int rows = jdbcTemplate.update(sql, userProfile.id(), username, 0);
         if (rows > 0) {
             //If row has been created
             System.out.println("A new row has been inserted.");
@@ -146,7 +159,7 @@ public class indexController {
             //If row has not been created
             System.out.println("Something went wrong.");
         }
-        return user;
+        return ResponseEntity.ok().build();
     }
 
     //Get list of users
