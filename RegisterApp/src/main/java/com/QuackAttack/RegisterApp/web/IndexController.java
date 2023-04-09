@@ -69,8 +69,7 @@ public class IndexController {
         USER_REGISTERED,
         USER_NOT_REGISTERED
     }
-    record RegisterResult(RegisterResultEnum result) { }
-    //TODO: TEST THIS
+    record RegisterResult(RegisterResultEnum result, String username) { }
     @PostMapping("/registerUser")
     public ResponseEntity<RegisterResult> register(@CookieValue String credentials){
         String username;
@@ -83,7 +82,7 @@ public class IndexController {
         List<UserData> users = registerAppDb.getUsers(username);
         if (users.size() > 0) {
             System.out.println("User already exists");
-            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_EXISTS));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_EXISTS, username));
         }
 
         //postgres insert into userdata
@@ -97,11 +96,11 @@ public class IndexController {
             int id = jdbcTemplate.queryForObject(sql2, Integer.class, username);
             profileAppClient.addUserProfile(new UserProfile(credentials, id));
 
-            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_REGISTERED));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_REGISTERED, username));
         }
         else {
             //If row has not been created
-            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_NOT_REGISTERED));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_NOT_REGISTERED, username));
 
         }
     }

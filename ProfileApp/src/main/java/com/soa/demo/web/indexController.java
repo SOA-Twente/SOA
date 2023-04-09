@@ -5,6 +5,7 @@ import com.soa.demo.auth.TokenVerifier;
 import com.soa.demo.objects.Message;
 import com.soa.demo.objects.UserData;
 import org.apache.catalina.User;
+import org.postgresql.jdbc.PgArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -16,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.soa.demo.security.GTokenVerify.checkToken;
@@ -46,21 +48,16 @@ public class indexController {
         return "Hello World";
     }
 
-    record userDataRecord(int id, String username, String description, int followers, int following, String[] tags) {};
+    record userDataRecord(int id, String username, String description, int followers, int following, String tags) {};
     @GetMapping("/getUserData/{username}")
     public userDataRecord getUserData(Model model, @PathVariable String username) throws SQLException {
         String sql = "SELECT * FROM userdata WHERE LOWER(username) = LOWER(?)";
 
         UserData userData = jdbcTemplate.queryForObject(sql,
                 BeanPropertyRowMapper.newInstance(UserData.class), username);
-        String[] tags;
-        if (userData.getTags() == null){
-            tags= new String[0];
-        } else {
-            tags = (String[])userData.getTags().getArray();
-        }
 
-        return new userDataRecord(userData.getId(), userData.getUsername(), userData.getDescription(), userData.getFollowers(), userData.getFollowing(), tags);
+
+        return new userDataRecord(userData.getId(), userData.getUsername(), userData.getDescription(), userData.getFollowers(), userData.getFollowing(), userData.getTags());
     }
 
     @GetMapping("/getQuacks")
@@ -124,10 +121,27 @@ public class indexController {
 
     //Need id of user to add tag and list of tags to add
     @PostMapping("/addTag")
-    public UserData addTag(@RequestBody UserData message){
+    public ResponseEntity<UserData> addTag(@RequestBody UserData message,@CookieValue String credentials){
+
+        String username;
+        try {
+            username = verifier.checkToken(credentials);
+        } catch (GeneralSecurityException | IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String tagInput = "{";
+        for (int i = 0; i < message.getTagsList().toArray().length; i++){
+            tagInput += message.getTagsList().toArray()[i];
+            if (i != message.getTagsList().toArray().length - 1){
+                tagInput += ",";
+            }
+        }
+        tagInput += "}";
         //postgress add userID to array of followers in userdata
-        String sql = "UPDATE userdata SET tags = array_append(tags, ?) WHERE id = ?";
-        int rows = jdbcTemplate.update(sql, message.getTags(), message.getId());
+//        String sql = "UPDATE userdata SET tags = array_append(tags, ?) WHERE id = ?";
+        String sql = "UPDATE userdata SET tags = ? WHERE username = ?";
+        int rows = jdbcTemplate.update(sql, tagInput, username);
         if (rows > 0) {
             //If row has been created
             System.out.println("A new row has been inserted.");
@@ -136,16 +150,25 @@ public class indexController {
             //If row has not been created
             System.out.println("Something went wrong.");
         }
-        return message;
+        return ResponseEntity.ok(message);
     }
 
     //Need id of user to add follower to and String of description to add
     @PostMapping("/addDescription")
-    public UserData addDescription( @RequestBody UserData message){
-        //Change value of description in userdata for certain user.
-        String sql = "UPDATE userdata SET description = ? WHERE id = ?";
+    public ResponseEntity<UserData> addDescription( @RequestBody UserData message, @CookieValue String credentials){
 
-        int rows = jdbcTemplate.update(sql, message.getDescription(), message.getId());
+
+        String username;
+        try {
+            username = verifier.checkToken(credentials);
+        } catch (GeneralSecurityException | IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        //Change value of description in userdata for certain user.
+        String sql = "UPDATE userdata SET description = ? WHERE username = ?";
+
+        int rows = jdbcTemplate.update(sql, message.getDescription(), username);
         if (rows > 0) {
             //If row has been created
             System.out.println("A new row has been inserted.");
@@ -154,7 +177,7 @@ public class indexController {
             //If row has not been created
             System.out.println("Something went wrong.");
         }
-        return message;
+        return ResponseEntity.ok(message);
     }
 
     //Need id of user to add follower to and Username to add

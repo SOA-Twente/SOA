@@ -46,23 +46,20 @@ public class IndexController {
         return jdbcTemplate.query(sql,
                 BeanPropertyRowMapper.newInstance(Quack.class), username);
     }
-//    @GetMapping("/getQuacksByUserId/{id}/{number}}")
-//    public List<Quack> getQuacksByUserId(@PathVariable int id,@PathVariable int number, Model model){
-//        String sql = "SELECT TOP ? FROM quacks WHERE user_id = ? ORDER BY created_at";
-//        return jdbcTemplate.query(sql,
-//                BeanPropertyRowMapper.newInstance(Quack.class), number, id);
-//    }
 
 
-//    Expected json:
-//    {
-//        "quack": "Hello World",
-//        "is_reply": false,
-//        "reply_to_quack_id": 0,
-//        "is_retweet": false,
-//        "retweet_of_quack_id": 0
-//    }
 
+
+
+/*    Expected json:
+    {
+        "quack": "Hello World",
+        "is_reply": false,
+        "reply_to_quack_id": 0,
+        "is_retweet": false,
+        "retweet_of_quack_id": 0
+    }
+*/
     @PostMapping("/postQuack")
     public ResponseEntity postMessage(@CookieValue String credentials,@RequestBody Quack message){
 
@@ -85,6 +82,7 @@ public class IndexController {
         }
         return ResponseEntity.ok("message");
     }
+
 
     @GetMapping("/searchQuacks/{search}/{number}")
     public ResponseEntity<SearchResultsQuack> searchQuacks(@PathVariable String search, Model model, @PathVariable int number){
