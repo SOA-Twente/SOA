@@ -40,11 +40,11 @@ public class IndexController {
     }
 
     //No need for body message
-    @GetMapping("/getQuacksByUserId/{id}")
-    public List<Quack> getQuacksByUserId(@PathVariable int id, Model model){
+    @GetMapping("/getQuacksByUsername/{username}")
+    public List<Quack> getQuacksByUserId(@PathVariable String username, Model model){
         String sql = "SELECT * FROM quacks WHERE user_id = ?";
         return jdbcTemplate.query(sql,
-                BeanPropertyRowMapper.newInstance(Quack.class), id);
+                BeanPropertyRowMapper.newInstance(Quack.class), username);
     }
 //    @GetMapping("/getQuacksByUserId/{id}/{number}}")
 //    public List<Quack> getQuacksByUserId(@PathVariable int id,@PathVariable int number, Model model){

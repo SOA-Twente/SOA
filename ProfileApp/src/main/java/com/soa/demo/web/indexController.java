@@ -53,7 +53,12 @@ public class indexController {
 
         UserData userData = jdbcTemplate.queryForObject(sql,
                 BeanPropertyRowMapper.newInstance(UserData.class), username);
-        String[] tags = (String[])userData.getTags().getArray();
+        String[] tags;
+        if (userData.getTags() == null){
+            tags= new String[0];
+        } else {
+            tags = (String[])userData.getTags().getArray();
+        }
 
         return new userDataRecord(userData.getId(), userData.getUsername(), userData.getDescription(), userData.getFollowers(), userData.getFollowing(), tags);
     }
