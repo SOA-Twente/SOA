@@ -125,10 +125,10 @@ public class IndexController {
      * @param username
      * @return List of users
      */
-    @GetMapping("/searchUsername/{username}")
-    public ResponseEntity<SearchResults> searchUsername(@PathVariable String username) {
-        String sql = "SELECT id, username, email FROM users WHERE LOWER(username) LIKE LOWER(?)";
-        List<SearchResults.UserData> user = jdbcTemplate.queryForList(sql, username +"%")
+    @GetMapping("/searchUsername/{username}/{number}")
+    public ResponseEntity<SearchResults> searchUsername(@PathVariable String username, @PathVariable int number) {
+        String sql = "SELECT id, username, email FROM users WHERE LOWER(username) LIKE LOWER(?) LIMIT ?";
+        List<SearchResults.UserData> user = jdbcTemplate.queryForList(sql, username +"%", number)
                 .stream()
                 .map(row -> new SearchResults.UserData(
                         (int) row.get("id"),

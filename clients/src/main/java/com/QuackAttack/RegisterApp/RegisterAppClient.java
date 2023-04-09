@@ -17,8 +17,8 @@ public interface RegisterAppClient {
                 .target(RegisterAppClient.class, "http://localhost:8082");
     }
 
-    @RequestLine("GET /searchUsername/{username}")
-    SearchResults searchUsername(@Param("username") String username);
+    @RequestLine("GET /searchUsername/{username}/{number}")
+    SearchResults searchUsername(@Param("username") String username, @Param("number") int number);
 
 
     @RequestLine("GET /doesUserExist")

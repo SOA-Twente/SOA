@@ -3,7 +3,7 @@ package com.QuackAttack.PostMessageApp.web;
 
 import com.QuackAttack.PostMessageApp.auth.TokenVerifier;
 import com.QuackAttack.RegisterApp.Quack;
-import com.QuackAttack.RegisterApp.QuackSearch;
+import com.QuackAttack.RegisterApp.SearchResultsQuack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.sql.Timestamp;
 import java.util.List;
 
 
@@ -85,16 +86,17 @@ public class IndexController {
         return ResponseEntity.ok("message");
     }
 
-    @GetMapping("/searchQuacks/{search}")
-    public List<QuackSearch> searchQuacks(@PathVariable String search, Model model){
-        String sql = "SELECT user_id,quack FROM quacks WHERE LOWER(quack) LIKE LOWER(?)";
-        List<QuackSearch> user = jdbcTemplate.queryForList(sql, "%" + search +"%")
+    @GetMapping("/searchQuacks/{search}/{number}")
+    public ResponseEntity<SearchResultsQuack> searchQuacks(@PathVariable String search, Model model, @PathVariable int number){
+        String sql = "SELECT user_id,quack, created_at FROM quacks WHERE LOWER(quack) LIKE LOWER(?) ORDER BY created_at DESC LIMIT ?";
+        List<SearchResultsQuack.quackData> user = jdbcTemplate.queryForList(sql, "%" + search +"%", number)
                 .stream()
-                .map(row -> new QuackSearch(
+                .map(row -> new SearchResultsQuack.quackData(
                         (String) row.get("user_id"),
-                        (String) row.get("quack")))
+                        (String) row.get("quack"),
+                        (Timestamp) row.get("created_at")))
                 .toList();
-        return user;
+        return ResponseEntity.ok(new SearchResultsQuack(user));
     }
 
 
