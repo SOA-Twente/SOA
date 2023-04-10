@@ -42,6 +42,7 @@ public class IndexController {
     //No need for body message
     @GetMapping("/getQuacksByUsername/{username}")
     public List<Quack> getQuacksByUserId(@PathVariable String username, Model model){
+        System.out.println(username);
         String sql = "SELECT * FROM quacks WHERE user_id = ?";
         return jdbcTemplate.query(sql,
                 BeanPropertyRowMapper.newInstance(Quack.class), username);

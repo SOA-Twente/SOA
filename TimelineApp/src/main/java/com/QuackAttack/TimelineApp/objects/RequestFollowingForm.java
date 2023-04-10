@@ -1,18 +1,15 @@
 package com.QuackAttack.TimelineApp.objects;
 
-import lombok.Getter;
-import lombok.Setter;
 
 public class RequestFollowingForm {
 
-    @Setter
-    private int user_id;
+    private String user_id;
 
-    public RequestFollowingForm(int user_id) {
+    public RequestFollowingForm(String user_id) {
         this.user_id = user_id;
     }
 
-    public int getUser_id() {
+    public String getUser_id() {
         return this.user_id;
     }
 }

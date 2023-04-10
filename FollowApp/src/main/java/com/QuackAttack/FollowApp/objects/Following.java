@@ -42,4 +42,13 @@ public class Following {
     public void setFollowing_id(String following_id) {
         this.following_id = following_id;
     }
+
+    @Override
+    public String toString() {
+        return "Following{" +
+                "id=" + id +
+                ", user_id='" + user_id + '\'' +
+                ", following_id='" + following_id + '\'' +
+                '}';
+    }
 }

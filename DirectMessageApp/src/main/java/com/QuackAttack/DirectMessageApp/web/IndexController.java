@@ -51,7 +51,6 @@ public class IndexController {
     @GetMapping("/getQuacking")
     public List<Message> getQuacking(@RequestBody GetConvoRequest request) throws SQLException {
 
-
         // request the messages with the found convoID
 
         List<Conversation> conversations = doesConvoExists(request);
