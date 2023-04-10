@@ -5,6 +5,9 @@ import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
 import feign.httpclient.ApacheHttpClient;
 
+/**
+ * This is the client for the ProfileApp
+ */
 public interface ProfileAppClient {
 
     static ProfileAppClient create() {

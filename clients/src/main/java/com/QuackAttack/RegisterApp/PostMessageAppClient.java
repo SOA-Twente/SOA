@@ -10,6 +10,10 @@ import feign.httpclient.ApacheHttpClient;
 
 import java.util.List;
 
+
+/**
+ * This is the client for the PostMessageApp
+ */
 public interface PostMessageAppClient {
 
     static PostMessageAppClient create() {

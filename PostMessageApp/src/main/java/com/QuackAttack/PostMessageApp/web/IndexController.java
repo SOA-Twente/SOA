@@ -39,7 +39,12 @@ public class IndexController {
                 BeanPropertyRowMapper.newInstance(Quack.class));
     }
 
-    //No need for body message
+    /**
+     * Returns a list of quacks by a specific user
+     * @param username the username of the user
+     * @param model the model
+     * @return a list of quacks by a specific user
+     */
     @GetMapping("/getQuacksByUsername/{username}")
     public List<Quack> getQuacksByUserId(@PathVariable String username, Model model){
         String sql = "SELECT * FROM quacks WHERE user_id = ?";
@@ -60,6 +65,13 @@ public class IndexController {
         "retweet_of_quack_id": 0
     }
 */
+
+    /**
+     * Posts a quack to the database
+     * @param credentials JWT
+     * @param message the quack, is_reply, reply_to_quack_id, is_retweet, retweet_of_quack_id
+     * @return the quack or failure
+     */
     @PostMapping("/postQuack")
     public ResponseEntity postMessage(@CookieValue String credentials,@RequestBody Quack message){
 
@@ -84,6 +96,13 @@ public class IndexController {
     }
 
 
+    /**
+     * Searches quacks by message content
+     * @param search the search term
+     * @param model the model
+     * @param number the number of quacks to return
+     * @return a list of quacks or failure
+     */
     @GetMapping("/searchQuacks/{search}/{number}")
     public ResponseEntity<SearchResultsQuack> searchQuacks(@PathVariable String search, Model model, @PathVariable int number){
         String sql = "SELECT user_id,quack, created_at FROM quacks WHERE LOWER(quack) LIKE LOWER(?) ORDER BY created_at DESC LIMIT ?";

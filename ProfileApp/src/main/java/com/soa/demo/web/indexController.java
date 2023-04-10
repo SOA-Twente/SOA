@@ -49,6 +49,14 @@ public class indexController {
     }
 
     record userDataRecord(int id, String username, String description, int followers, int following, String tags) {};
+
+    /**
+     * Returns a list of user data for a specific user
+     * @param model the model
+     * @param username the username of the user
+     * @return a list of user data for a specific user
+     * @throws SQLException
+     */
     @GetMapping("/getUserData/{username}")
     public userDataRecord getUserData(Model model, @PathVariable String username) throws SQLException {
         String sql = "SELECT * FROM userdata WHERE LOWER(username) = LOWER(?)";
@@ -60,6 +68,11 @@ public class indexController {
         return new userDataRecord(userData.getId(), userData.getUsername(), userData.getDescription(), userData.getFollowers(), userData.getFollowing(), userData.getTags());
     }
 
+    /**
+     * Returns all quacks
+     * @param model the model
+     * @return all quacks
+     */
     @GetMapping("/getQuacks")
     public List<Message> getQuacks(Model model){
         String sql = "SELECT * FROM quacks";
@@ -68,6 +81,12 @@ public class indexController {
     }
 
     //Need id of user to remove follower from, decrements followers
+
+    /**
+     * Removes a follower from a user
+     * @param message the message
+     * @return 0
+     */
     @PostMapping("/removeFollower")
     public int removeFollower(@RequestBody UserData message){
         //postgres decrement follower value from userdata
@@ -84,6 +103,12 @@ public class indexController {
         return 0;
     }
     //Need id of user to remove follower from, increments followers
+
+    /**
+     * Adds a follower to a user
+     * @param message the message
+     * @return
+     */
     @PostMapping("/addFollower")
     public int addFollower(@RequestBody UserData message){
         //postgres decrement follower value from userdata
@@ -101,25 +126,15 @@ public class indexController {
         //Add follower to userdata
     }
 
-    //Need id of user to add follower to and id of follower to add
-    @PostMapping("/addFollowing")
-    public UserData addFollowing(@RequestBody UserData message){
-        //postgress add userID to array of followers in userdata
-        String sql = "INSERT INTO followings (user_id, following_id) VALUES (?,?)";
 
-        int rows = jdbcTemplate.update(sql, message.getId(), message.getFollowing());
-        if (rows > 0) {
-            //If row has been created
-            System.out.println("A new row has been inserted.");
-        }
-        else {
-            //If row has not been created
-            System.out.println("Something went wrong.");
-        }
-        return message;
-    }
+    //Need id of user to remove follower from, decrements following/**
 
-    //Need id of user to add tag and list of tags to add
+    /**
+     * Sets tags to a user
+     * @param message the tags for the user
+     * @param credentials JWT
+     * @return the tags for the user
+     */
     @PostMapping("/addTag")
     public ResponseEntity<UserData> addTag(@RequestBody UserData message,@CookieValue String credentials){
 
@@ -154,6 +169,13 @@ public class indexController {
     }
 
     //Need id of user to add follower to and String of description to add
+
+    /**
+     * Adds a description to a user
+     * @param message the description for the user
+     * @param credentials JWT
+     * @return
+     */
     @PostMapping("/addDescription")
     public ResponseEntity<UserData> addDescription( @RequestBody UserData message, @CookieValue String credentials){
 
@@ -181,6 +203,12 @@ public class indexController {
     }
 
     //Need id of user to add follower to and Username to add
+
+    /**
+     * Adds a user profile to the database
+     * @param userProfile the user profile
+     * @return
+     */
     @PostMapping("/addUserProfile")
     public ResponseEntity<Object> addUser(@RequestBody UserProfile userProfile){
         String sql = "INSERT INTO userdata (id, username, followers) VALUES (?,?, ?)";
@@ -204,11 +232,14 @@ public class indexController {
         return ResponseEntity.ok().build();
     }
 
-    //Get list of users
-//    @CrossOrigin(origins = "http://localhost:5173")
+    /**
+     * gets all the users in the database
+     * @param model the model
+     * @return all the users in the database
+     */
     @GetMapping("/users")
     public List<UserData>  getUsers(Model model){
-        String sql = "SELECT * FROM userData";
+        String sql = "SELECT * FROM userdata";
         List<UserData> listUsers = jdbcTemplate.query(sql,
                 BeanPropertyRowMapper.newInstance(UserData.class));
 
