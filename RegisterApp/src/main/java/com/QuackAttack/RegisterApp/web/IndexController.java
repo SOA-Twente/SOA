@@ -49,8 +49,11 @@ public class IndexController {
         return gson.toJson("Hello World");
     }
 
-
-    //TODO: TEST THIS
+    /**
+     * returns wheter a user already has an account or not
+     * @param credentials JWT
+     * @return true or false
+     */
     @GetMapping("/doesUserExist")
     public ResponseEntity<DoesUserExistResult> doesUserExist(@CookieValue String credentials) {
         String username;
@@ -70,6 +73,12 @@ public class IndexController {
         USER_NOT_REGISTERED
     }
     record RegisterResult(RegisterResultEnum result, String username) { }
+
+    /**
+     * Registers a user
+     * @param credentials JWT
+     * @return true or false
+     */
     @PostMapping("/registerUser")
     public ResponseEntity<RegisterResult> register(@CookieValue String credentials){
         String username;
@@ -106,7 +115,11 @@ public class IndexController {
     }
 
 
-    //TODO: TEST THIS
+    /**
+     * Gets user data
+     * @param credentials JWT
+     * @return User data
+     */
     @GetMapping("/getUserData")
     public ResponseEntity getUserData(@CookieValue String credentials){
         String username;

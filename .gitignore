@@ -5,3 +5,11 @@
 /ProfileApp/build/
 /PostMessageApp/build/
 /DirectMessageApp/build/
+/FollowApp/build/
+/TimelineApp/build/
+/Timeline-Consumer/build/
+/Timeline-Producer/build/
+/DirectMessageApp/build/
+/DirectMessage-Consumer/build/
+/DirectMessage-Producer/build/
+/clients/build/

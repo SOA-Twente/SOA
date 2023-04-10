@@ -26,6 +26,13 @@ public class IndexController {
     @Autowired
     private TokenVerifier verifier;
 
+
+    /**
+     * This method is used to unfollow a user
+     * @param credentials JWT
+     * @param following Following object, id, user_id and following_id
+     * @return request failure or success
+     */
     @PostMapping("/unfollow")
     public ResponseEntity<String> unfollowUser(@CookieValue String credentials,@RequestBody Following following) {
 
@@ -55,6 +62,12 @@ public class IndexController {
         }
     }
 
+    /**
+     * This method is used to follow a user
+     * @param credentials JWT
+     * @param following Following object, id, user_id and following_id
+     * @return request failure or success
+     */
     @PostMapping("/follow")
     public ResponseEntity<String> followUser(@CookieValue String credentials,@RequestBody Following following) {
 
@@ -88,6 +101,11 @@ public class IndexController {
         }
     }
 
+    /**
+     * This method is used to get a list of users that the user is following
+     * @param credentials JWT
+     * @return badrequest or list of users
+     */
     @GetMapping("/getFollowing")
     public List<Following> followingList(@CookieValue String credentials) {
 
@@ -106,6 +124,4 @@ public class IndexController {
                 BeanPropertyRowMapper.newInstance(Following.class), user_id);
 
     }
-
-
 }

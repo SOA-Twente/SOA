@@ -8,6 +8,9 @@ import feign.httpclient.ApacheHttpClient;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+/**
+ * This is the client for the ProfileApp
+ */
 public interface RegisterAppClient {
     static RegisterAppClient create() {
         return Feign.builder()
