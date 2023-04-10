@@ -39,3 +39,12 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
+task moveJar(type: Copy){
+	from "${buildDir}/libs"
+	into "${buildDir}/../../jar"
+	include "*.jar"
+}
+
+tasks.build.dependsOn(moveJar)

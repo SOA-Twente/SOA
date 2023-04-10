@@ -37,3 +37,12 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+task moveJar(type: Copy){
+	from "${buildDir}/libs"
+	into "${buildDir}/../../jar"
+	into "${buildDir}/../../dockerfiles/docker/profile_app"
+	include "*.jar"
+}
+
+tasks.build.dependsOn(moveJar)

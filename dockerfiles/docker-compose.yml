@@ -1,0 +1,21 @@
+version: '3'
+services:
+  profile_postgres:
+    image: 'postgres'
+    container_name: profile_postgres
+    # command: --init-file ./init.sql
+    volumes:
+        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+    ports:
+      - "5432:5432"
+  profile_app:
+    build: ./docker/profile_app
+    ports:
+     - "8080:8080"
+  # follow_app:
+  #   build: ./docker/follow_app
+  #   ports:
+  #     - "8084:8084"
