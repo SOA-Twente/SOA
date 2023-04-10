@@ -37,7 +37,13 @@ public class indexController {
 
     private static Gson gson = new Gson();
 
-    //Example of how to handle JWT. This is how you would get the user email from the JWT
+    /**
+     * Searches with a specific number of requests for users and messages
+     * @param search the search term
+     * @param number the number of requests
+     * @return a list of search results
+     * @throws IOException
+     */
     @GetMapping("/search/{search}/{number}")
     public ResponseEntity<Object> searchUsername(@PathVariable String search,@PathVariable int number) throws IOException {
         System.out.println("searching for " + search);
