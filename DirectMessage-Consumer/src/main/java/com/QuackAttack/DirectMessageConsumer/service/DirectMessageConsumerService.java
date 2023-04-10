@@ -106,7 +106,7 @@ public class DirectMessageConsumerService {
                 // message was send successfully
                 log.info("message was sent");
             } else {
-                log.error("message was not sent, error location is directquack");
+                log.error("message was not sent, error location is direct quack");
             }
 
         } catch (DataAccessException e) {
