@@ -10,8 +10,8 @@ public class ConversationRowMapper implements RowMapper<Conversation> {
     public Conversation mapRow(ResultSet rs, int rowNum) throws SQLException {
         Conversation conversation = new Conversation();
         conversation.setConvoID(rs.getInt("convoID"));
-        conversation.setUserInitiator(rs.getInt("userInitiator"));
-        conversation.setUserReceiver(rs.getInt("userReceiver"));
+        conversation.setUserInitiator(rs.getString("userinitiator"));
+        conversation.setUserReceiver(rs.getString("userreceiver"));
         return conversation;
     }
 }

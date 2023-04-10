@@ -12,19 +12,19 @@ public class MessageRequest {
         this.convoID = convoID;
     }
 
-    public int getSender() {
+    public String getSender() {
         return sender;
     }
 
-    public void setSender(int sender) {
+    public void setSender(String sender) {
         this.sender = sender;
     }
 
-    public int getReceiver() {
+    public String getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(int receiver) {
+    public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
 
@@ -37,7 +37,7 @@ public class MessageRequest {
     }
 
     private int convoID;
-    private int sender;
-    private int receiver;
+    private String sender;
+    private String receiver;
     private String message;
 }

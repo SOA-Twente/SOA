@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class Conversation {
-    public Conversation(int userInitiator, int userReceiver) {
+    public Conversation(String userInitiator, String userReceiver) {
         this.userInitiator = userInitiator;
         this.userReceiver = userReceiver;
     }
@@ -20,24 +20,24 @@ public class Conversation {
         this.convoID = convoID;
     }
 
-    public int getUserInitiator() {
+    public String getUserInitiator() {
         return userInitiator;
     }
 
-    public void setUserInitiator(int userInitiator) {
+    public void setUserInitiator(String userInitiator) {
         this.userInitiator = userInitiator;
     }
 
-    public int getUserReceiver() {
+    public String getUserReceiver() {
         return userReceiver;
     }
 
-    public void setUserReceiver(int userReceiver) {
+    public void setUserReceiver(String userReceiver) {
         this.userReceiver = userReceiver;
     }
 
 
     private int convoID;
-    private int userInitiator;
-    private int userReceiver;
+    private String userInitiator;
+    private String userReceiver;
 }

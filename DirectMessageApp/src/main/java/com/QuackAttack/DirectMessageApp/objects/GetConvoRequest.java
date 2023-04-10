@@ -4,22 +4,22 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class GetConvoRequest {
-    public int getInitiator() {
+    public String getInitiator() {
         return initiator;
     }
 
-    public void setInitiator(int initiator) {
+    public void setInitiator(String initiator) {
         this.initiator = initiator;
     }
 
-    public int getReceiver() {
+    public String getReceiver() {
         return receiver;
     }
 
-    public void setReceiver(int receiver) {
+    public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
 
-    private int initiator;
-    private int receiver;
+    private String initiator;
+    private String receiver;
 }
