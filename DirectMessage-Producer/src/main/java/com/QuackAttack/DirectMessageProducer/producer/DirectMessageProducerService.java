@@ -16,8 +16,8 @@ public class DirectMessageProducerService {
     JmsTemplate jmsTemplate;
 
     // TODO give the actual queue name in app properties
-    @Value("${active-mq.get-conversation-queue}")
-    private String getConvoQueue;
+    @Value("${active-mq.direct-message-queue}")
+    private String directMessageQueue;
 
     @Value("${active-mq.create-conversation-queue}")
     private String createConvoQueue;
@@ -31,9 +31,9 @@ public class DirectMessageProducerService {
      */
     public void addGetConvoQueue(GetConvoRequest request) {
         try {
-            log.info("Attempting to send request to queue:" + getConvoQueue);
+            log.info("Attempting to send request to queue:" + directMessageQueue);
 
-            jmsTemplate.convertAndSend(getConvoQueue, request);
+            jmsTemplate.convertAndSend(directMessageQueue, request);
         } catch (Exception e) {
             log.error("Received Exception during sending to queue: " + e);
         }

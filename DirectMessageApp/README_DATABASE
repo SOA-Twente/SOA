@@ -1,14 +1,15 @@
 CREATE TABLE Conversations (
-  convoID SERIAL PRIMARY KEY,
-  UserInitiator varchar(255),
-  UserReceiver varchar(255),
-  CONSTRAINT uc_user_initiator_user_receiver UNIQUE(UserInitiator, UserReceiver)
+  convo_id SERIAL PRIMARY KEY,
+  user_initiator varchar(255),
+  user_receiver varchar(255),
+  CONSTRAINT uc_user_initiator_user_receiver UNIQUE(user_initiator, user_receiver)
 );
 CREATE TABLE Messages (
-  ID SERIAL PRIMARY KEY,
-  ConvoID INT,
-  Sender varchar(255),
-  Receiver varchar(255),
+  id SERIAL PRIMARY KEY,
+  convo_id INT,
+  sender varchar(255),
+  receiver varchar(255),
   message TEXT,
-  CONSTRAINT fk_conversations FOREIGN KEY (ConvoID) REFERENCES Conversations(convoID)
+  created_at TIMESTAMP DEFAULT NOW(),
+  CONSTRAINT fk_conversations FOREIGN KEY (convo_id) REFERENCES Conversations(convo_id)
 );

@@ -49,4 +49,14 @@ public class Message {
     private String sender;
     private String receiver;
     private String message;
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    private String createdAt;
 }

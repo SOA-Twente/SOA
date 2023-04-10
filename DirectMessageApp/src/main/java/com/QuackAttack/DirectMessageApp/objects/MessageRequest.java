@@ -35,9 +35,18 @@ public class MessageRequest {
     public void setMessage(String message) {
         this.message = message;
     }
+    public String getCreatedAt() {
+        return createdAt;
+    }
 
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
     private int convoID;
     private String sender;
     private String receiver;
     private String message;
+
+
+    private String createdAt;
 }
