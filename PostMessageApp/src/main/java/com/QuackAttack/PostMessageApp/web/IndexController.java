@@ -34,7 +34,7 @@ public class IndexController {
 
     @GetMapping("/getAllQuacks")
     public List<Quack> getQuacks(Model model){
-        String sql = "SELECT * FROM quacks";
+        String sql = "SELECT * FROM quacks ORDER BY created_at DESC";
         return jdbcTemplate.query(sql,
                 BeanPropertyRowMapper.newInstance(Quack.class));
     }
@@ -47,7 +47,7 @@ public class IndexController {
      */
     @GetMapping("/getQuacksByUsername/{username}")
     public List<Quack> getQuacksByUserId(@PathVariable String username, Model model){
-        String sql = "SELECT * FROM quacks WHERE user_id = ?";
+        String sql = "SELECT * FROM quacks WHERE user_id = ? ORDER BY created_at DESC";
         return jdbcTemplate.query(sql,
                 BeanPropertyRowMapper.newInstance(Quack.class), username);
     }
@@ -81,9 +81,11 @@ public class IndexController {
         } catch (GeneralSecurityException | IOException e) {
             return ResponseEntity.badRequest().build();
         }
+
+        System.out.println(message.toString());
         String sql = "INSERT INTO quacks (user_id, quack, is_reply, reply_to_quack_id, is_retweet, retweet_of_quack_id) VALUES (?,?, ?, ?, ?, ?)";
 
-        int rows = jdbcTemplate.update(sql, username, message.getQuack(), message.isReply(), message.getReply_to_quack_id(), message.isIs_retweet(), message.getRetweet_of_quack_id());
+        int rows = jdbcTemplate.update(sql, username, message.getQuack(), message.isIs_reply(), message.getReply_to_quack_id(), message.isIs_retweet(), message.getRetweet_of_quack_id());
         if (rows > 0) {
             //If row has been created
             System.out.println("A new row has been inserted.");
@@ -105,10 +107,11 @@ public class IndexController {
      */
     @GetMapping("/searchQuacks/{search}/{number}")
     public ResponseEntity<SearchResultsQuack> searchQuacks(@PathVariable String search, Model model, @PathVariable int number){
-        String sql = "SELECT user_id,quack, created_at FROM quacks WHERE LOWER(quack) LIKE LOWER(?) ORDER BY created_at DESC LIMIT ?";
+        String sql = "SELECT id, user_id,quack, created_at FROM quacks WHERE LOWER(quack) LIKE LOWER(?) ORDER BY created_at DESC LIMIT ?";
         List<SearchResultsQuack.quackData> user = jdbcTemplate.queryForList(sql, "%" + search +"%", number)
                 .stream()
                 .map(row -> new SearchResultsQuack.quackData(
+                        (int) row.get("id"),
                         (String) row.get("user_id"),
                         (String) row.get("quack"),
                         (Timestamp) row.get("created_at")))
@@ -116,5 +119,16 @@ public class IndexController {
         return ResponseEntity.ok(new SearchResultsQuack(user));
     }
 
+    @GetMapping("/getQuackById/{id}")
+    public List<Quack> getQuackById(@PathVariable int id){
+        String sql = "SELECT * FROM quacks WHERE id = ?";
+        Quack originalQuack = jdbcTemplate.queryForObject(sql,
+                BeanPropertyRowMapper.newInstance(Quack.class), id);
+        String sql2 = "SELECT * FROM quacks WHERE reply_to_quack_id = ? ORDER BY created_at ASC";
+        List<Quack> replies = jdbcTemplate.query(sql2,
+                BeanPropertyRowMapper.newInstance(Quack.class), id);
+        replies.add(0, originalQuack);
+        return replies;
+    }
 
 }
