@@ -1,14 +1,12 @@
 package com.QuackAttack.RegisterApp.web;
 
-import com.QuackAttack.RegisterApp.DoesUserExistResult;
-import com.QuackAttack.RegisterApp.SearchResults;
+import com.QuackAttack.RegisterApp.*;
 import com.QuackAttack.RegisterApp.auth.TokenVerifier;
 import com.QuackAttack.RegisterApp.database.RegisterAppDb;
 import com.QuackAttack.RegisterApp.objects.UserData;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +27,10 @@ public class IndexController {
     private RegisterAppDb registerAppDb;
     @Autowired
     private TokenVerifier verifier;
+
+    private ProfileAppClient profileAppClient = ProfileAppClient.create();
+
+
 
     private static final Gson gson = new Gson();
 
@@ -67,8 +69,7 @@ public class IndexController {
         USER_REGISTERED,
         USER_NOT_REGISTERED
     }
-    record RegisterResult(RegisterResultEnum result) { }
-    //TODO: TEST THIS
+    record RegisterResult(RegisterResultEnum result, String username) { }
     @PostMapping("/registerUser")
     public ResponseEntity<RegisterResult> register(@CookieValue String credentials){
         String username;
@@ -81,7 +82,7 @@ public class IndexController {
         List<UserData> users = registerAppDb.getUsers(username);
         if (users.size() > 0) {
             System.out.println("User already exists");
-            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_EXISTS));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_EXISTS, username));
         }
 
         //postgres insert into userdata
@@ -89,11 +90,17 @@ public class IndexController {
         int rows = jdbcTemplate.update(sql, username, username);
         if (rows > 0) {
             //If row has been created
-            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_REGISTERED));
+
+            //add profile
+            String sql2 = "SELECT id FROM users WHERE username = ?";
+            int id = jdbcTemplate.queryForObject(sql2, Integer.class, username);
+            profileAppClient.addUserProfile(new UserProfile(credentials, id));
+
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_REGISTERED, username));
         }
         else {
             //If row has not been created
-            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_NOT_REGISTERED));
+            return ResponseEntity.ok().body(new RegisterResult(RegisterResultEnum.USER_NOT_REGISTERED, username));
 
         }
     }
@@ -125,10 +132,10 @@ public class IndexController {
      * @param username
      * @return List of users
      */
-    @GetMapping("/searchUsername/{username}")
-    public ResponseEntity<SearchResults> searchUsername(@PathVariable String username) {
-        String sql = "SELECT id, username, email FROM users WHERE LOWER(username) LIKE LOWER(?)";
-        List<SearchResults.UserData> user = jdbcTemplate.queryForList(sql, username +"%")
+    @GetMapping("/searchUsername/{username}/{number}")
+    public ResponseEntity<SearchResults> searchUsername(@PathVariable String username, @PathVariable int number) {
+        String sql = "SELECT id, username, email FROM users WHERE LOWER(username) LIKE LOWER(?) LIMIT ?";
+        List<SearchResults.UserData> user = jdbcTemplate.queryForList(sql, username +"%", number)
                 .stream()
                 .map(row -> new SearchResults.UserData(
                         (int) row.get("id"),

@@ -1,8 +1,10 @@
 package com.QuackAttack.SearchApp.web;
 
 
+import com.QuackAttack.RegisterApp.PostMessageAppClient;
 import com.QuackAttack.RegisterApp.RegisterAppClient;
 import com.QuackAttack.RegisterApp.SearchResults;
+import com.QuackAttack.RegisterApp.SearchResultsQuack;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -16,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -29,24 +32,19 @@ public class indexController {
     private JdbcTemplate jdbcTemplate;
 
     private RegisterAppClient registerAppClient = RegisterAppClient.create();
+    private PostMessageAppClient postMessageAppClient = PostMessageAppClient.create();
+
 
     private static Gson gson = new Gson();
 
     //Example of how to handle JWT. This is how you would get the user email from the JWT
-    @GetMapping("/search/{search}")
-    public ResponseEntity<SearchResults> searchUsername(@PathVariable String search) throws IOException {
+    @GetMapping("/search/{search}/{number}")
+    public ResponseEntity<Object> searchUsername(@PathVariable String search,@PathVariable int number) throws IOException {
+        System.out.println("searching for " + search);
 
-        SearchResults searchResults = registerAppClient.searchUsername(search);
+        SearchResults searchResults = registerAppClient.searchUsername(search, number);
+        SearchResultsQuack searchResultsQuacks = postMessageAppClient.searchMessages(search, number);
 
-//        System.out.println("");
-//        Object response = new RestTemplate()
-//                .exchange(SEARCH_USERNAME + search, HttpMethod.GET, new HttpEntity<>("Search request"), new ParameterizedTypeReference<Object>() {
-//        }).getBody();
-
-//        Map<String,Object> map = new HashMap<String,Object>();
-//        map.put("users", response);
-//        map.put("message search", "Search successful");
-
-        return ResponseEntity.ok(searchResults);
+        return ResponseEntity.ok(List.of(searchResults, searchResultsQuacks));
     }
 }

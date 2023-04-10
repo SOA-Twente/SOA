@@ -5,18 +5,41 @@ import lombok.Setter;
 
 public class Following {
 
-    @Getter @Setter
-    private int ID;
-    @Getter @Setter
-    private int user_ID;
-    @Getter @Setter
-    private int following_ID;
+    private int id;
+    private String user_id;
+    private String following_id;
 
-    public int getID() {
-        return this.ID;
-    }
-    public int getUser_ID() {
-        return this.user_ID;
+
+    public Following() {
     }
 
+    public Following(int id, String user_id, String following_id) {
+        this.id = id;
+        this.user_id = user_id;
+        this.following_id = following_id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getFollowing_id() {
+        return following_id;
+    }
+
+    public void setFollowing_id(String following_id) {
+        this.following_id = following_id;
+    }
 }
