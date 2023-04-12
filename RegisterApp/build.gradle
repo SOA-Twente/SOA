@@ -46,6 +46,12 @@ task moveJar(type: Copy){
 	into "${buildDir}/../../jar"
 	include "*.jar"
 }
+task moveJarDocker(type: Copy){
+	from "${buildDir}/libs"
+	into "${buildDir}/../../dockerfiles/docker/register_app"
+	include "*.jar"
+}
 
-tasks.build.dependsOn(moveJar)
+tasks.moveJarDocker.dependsOn(build)
+tasks.moveJar.dependsOn(moveJarDocker)
 

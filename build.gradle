@@ -6,4 +6,27 @@ allprojects {
 		mavenCentral()
 	}
 }
+task build {
+	evaluationDependsOnChildren();
+	dependsOn subprojects.moveJar
+	doLast {
+		println "Build finished"
+	}
+}
+task buildDockerImages(type: Exec){
+	workingDir 'dockerfiles'
+	commandLine 'docker-compose', 'build'
+	println "Build docker finished"
+}
 
+//task kubernetes(type: Exec){
+//	workingDir 'kubernetes'
+////	commandLine 'minikube', 'image', 'load', 'dockerfiles-follow_app'
+//	commandLine 'cmd', 'minikube', 'image', 'load', 'dockerfiles-profile_app'
+//	commandLine 'cmd', './script.bat'
+//	println 'build kubernetes finished'
+//}
+
+
+tasks.buildDockerImages.dependsOn(build)
+//tasks.kubernetes.dependsOn(buildDockerImages)

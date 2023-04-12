@@ -11,8 +11,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -28,8 +26,6 @@ public class indexController {
 
 
 //    private static final String SEARCH_USERNAME = "http://localhost:8082/searchUsername/";
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     private RegisterAppClient registerAppClient = RegisterAppClient.create();
     private PostMessageAppClient postMessageAppClient = PostMessageAppClient.create();

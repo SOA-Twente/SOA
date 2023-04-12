@@ -9,10 +9,8 @@ plugins {
 sourceCompatibility = '17'
 
 dependencies {
-	//Postgresql
-	implementation 'org.postgresql:postgresql:42.2.23'
-	
-	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+
 
 	implementation 'com.google.api-client:google-api-client:1.32.1'
 
@@ -23,7 +21,6 @@ dependencies {
 	// https://mvnrepository.com/artifact/com.google.code.gson/gson
 	implementation 'com.google.code.gson:gson:2.10.1'
 
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
@@ -46,5 +43,11 @@ task moveJar(type: Copy){
 	into "${buildDir}/../../jar"
 	include "*.jar"
 }
+task moveJarDocker(type: Copy){
+	from "${buildDir}/libs"
+	into "${buildDir}/../../dockerfiles/docker/search_app"
+	include "*.jar"
+}
 
-tasks.build.dependsOn(moveJar)
+tasks.moveJarDocker.dependsOn(build)
+tasks.moveJar.dependsOn(moveJarDocker)

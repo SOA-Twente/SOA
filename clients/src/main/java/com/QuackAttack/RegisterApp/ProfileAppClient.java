@@ -15,7 +15,7 @@ public interface ProfileAppClient {
                 .client(new ApacheHttpClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
-                .target(com.QuackAttack.RegisterApp.ProfileAppClient.class, "http://localhost:8080");
+                .target(com.QuackAttack.RegisterApp.ProfileAppClient.class, "http://profile-app-sev.production:8080");
     }
 
     @RequestLine("POST /addUserProfile")

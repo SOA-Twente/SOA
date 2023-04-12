@@ -17,7 +17,7 @@ public interface RegisterAppClient {
                 .client(new ApacheHttpClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
-                .target(RegisterAppClient.class, "http://localhost:8082");
+                .target(RegisterAppClient.class, "http://register-app-sev.production:8082");
     }
 
     @RequestLine("GET /searchUsername/{username}/{number}")

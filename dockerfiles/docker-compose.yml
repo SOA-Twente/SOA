@@ -1,21 +1,47 @@
 version: '3'
 services:
-  profile_postgres:
-    image: 'postgres'
-    container_name: profile_postgres
-    # command: --init-file ./init.sql
-    volumes:
-        - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=root
-    ports:
-      - "5432:5432"
-  profile_app:
-    build: ./docker/profile_app
-    ports:
-     - "8080:8080"
-  # follow_app:
-  #   build: ./docker/follow_app
+  # profiledatabase:
+  #   image: 'postgres'
+  #   container_name: profiledatabase
+  #   volumes:
+  #       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
   #   ports:
-  #     - "8084:8084"
+  #     - "5432:5432"
+  # db_profile:
+  #   image: 'postgres'
+  #   container_name: db_profile
+  #   volumes:
+  #       - ./docker/profile_app/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
+  #   ports:
+  #     - "5433:5432"
+  profile_app:
+    build: ./docker/profile_app/
+    # ports:
+    #  - "8080:8080"
+  # db_follow:
+  #   image: 'postgres'
+  #   container_name: db_follow
+  #   # command: --init-file ./init.sql
+  #   volumes:
+  #       - ./docker/follow_app/init.sql:/docker-entrypoint-initdb.d/init.sql
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=root
+  #   ports:
+  #     - "5434:5432"
+  follow_app:
+    build: ./docker/follow_app/
+    # ports:
+    #   - "8084:8084"
+  post_message_app:
+    build: ./docker/post_message_app/
+  register_app:
+    build: ./docker/register_app/
+  search_app:
+    build: ./docker/search_app/

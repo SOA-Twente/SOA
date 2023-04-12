@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-profile-config
+  namespace: production
+  labels:
+    app: db-profile
+data:
+  POSTGRES_DB: db_profile
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: root
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: db-profile-pv-volume
+  namespace: production
+  labels:
+    type: local
+    app: db-profile
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/db-profile"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: production
+  name: db-profile-pv-claim
+  labels:
+    app: db-profile
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-profile
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-profile
+  template:
+    metadata:
+      labels:
+        app: db-profile
+    spec:
+      containers:
+        - name: postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: db-profile-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data/
+              name: postgres
+      volumes:
+        - name: postgres
+          persistentVolumeClaim:
+            claimName: db-profile-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-profile
+  namespace: production
+  labels:
+    app: db-profile
+spec:
+  type: NodePort
+  ports:
+   - port: 5432
+  selector:
+   app: db-profile
