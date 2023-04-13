@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/DirectMessage-Consumer" />
             <option value="$PROJECT_DIR$/DirectMessage-Producer" />
             <option value="$PROJECT_DIR$/DirectMessageApp" />
+            <option value="$PROJECT_DIR$/DirectMessageConsumer" />
             <option value="$PROJECT_DIR$/DirectMessageProducer" />
             <option value="$PROJECT_DIR$/FollowApp" />
             <option value="$PROJECT_DIR$/PostMessageApp" />
