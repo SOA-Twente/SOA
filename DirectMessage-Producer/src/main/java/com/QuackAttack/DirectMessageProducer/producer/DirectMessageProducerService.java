@@ -2,14 +2,12 @@ package com.QuackAttack.DirectMessageProducer.producer;
 
 import com.QuackAttack.DirectMessageProducer.objects.GetConvoRequest;
 import com.QuackAttack.DirectMessageProducer.objects.MessageRequest;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
-@Slf4j
 public class DirectMessageProducerService {
 
     @Autowired
@@ -19,11 +17,7 @@ public class DirectMessageProducerService {
     @Value("${active-mq.direct-message-queue}")
     private String directMessageQueue;
 
-    @Value("${active-mq.create-conversation-queue}")
-    private String createConvoQueue;
 
-    @Value("${active-mq.send-msg-queue}")
-    private String sendMsgQueue;
 
     /**
      * addQueue will send a message to the specified message queue.
@@ -31,31 +25,30 @@ public class DirectMessageProducerService {
      */
     public void addGetConvoQueue(GetConvoRequest request) {
         try {
-            log.info("Attempting to send request to queue:" + directMessageQueue);
-
+            System.out.println("Attempting to send request to queue:" + directMessageQueue);
             jmsTemplate.convertAndSend(directMessageQueue, request);
         } catch (Exception e) {
-            log.error("Received Exception during sending to queue: " + e);
+            System.out.println("Received Exception during sending to queue: " + e);
         }
     }
 
     public void addCreateConvoQueue(GetConvoRequest request) {
         try {
-            log.info("Attempting to send request to queue:" + createConvoQueue);
+            System.out.println("Attempting to send request to queue:" + directMessageQueue);
 
-            jmsTemplate.convertAndSend(createConvoQueue, request);
+            jmsTemplate.convertAndSend(directMessageQueue, request);
         } catch (Exception e) {
-            log.error("Received Exception during sending to queue: " + e);
+            System.out.println("Received Exception during sending to queue: " + e);
         }
     }
 
     public void addMsgRequestQueue(MessageRequest request) {
         try {
-            log.info("Attempting to send request to queue:" + sendMsgQueue);
+            System.out.println("Attempting to send request to queue:" + directMessageQueue);
 
-            jmsTemplate.convertAndSend(sendMsgQueue, request);
+            jmsTemplate.convertAndSend(directMessageQueue, request);
         } catch (Exception e) {
-            log.error("Received Exception during sending to queue: " + e);
+            System.out.println("Received Exception during sending to queue: " + e);
         }
     }
 }

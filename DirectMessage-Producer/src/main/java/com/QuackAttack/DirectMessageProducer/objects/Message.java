@@ -1,17 +1,50 @@
 package com.QuackAttack.DirectMessageProducer.objects;
 
-import lombok.Getter;
-import lombok.Setter;
 
 public class Message {
-    @Getter @Setter
+    public int getID() {
+        return ID;
+    }
+
+    public void setID(int ID) {
+        this.ID = ID;
+    }
+
+    public int getConvoID() {
+        return convoID;
+    }
+
+    public void setConvoID(int convoID) {
+        this.convoID = convoID;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     private int ID;
-    @Getter @Setter
     private int convoID;
-    @Getter @Setter
     private String sender;
-    @Getter @Setter
     private String receiver;
-    @Getter @Setter
     private String message;
 }

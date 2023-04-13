@@ -1,15 +1,37 @@
 package com.QuackAttack.DirectMessageConsumer.objects;
 
-import lombok.Getter;
-import lombok.Setter;
 
 public class Conversation {
-    @Getter @Setter
+
+    public int getConvoID() {
+        return convoID;
+    }
+
+    public void setConvoID(int convoID) {
+        this.convoID = convoID;
+    }
+
+    public int getUserInitiator() {
+        return userInitiator;
+    }
+
+    public void setUserInitiator(int userInitiator) {
+        this.userInitiator = userInitiator;
+    }
+
+    public int getUserReceiver() {
+        return userReceiver;
+    }
+
+    public void setUserReceiver(int userReceiver) {
+        this.userReceiver = userReceiver;
+    }
+
     private int convoID;
 
-    @Getter @Setter
+
     private int userInitiator;
 
-    @Getter @Setter
+
     private int userReceiver;
 }

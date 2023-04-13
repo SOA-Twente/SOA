@@ -29,7 +29,7 @@ public class IndexController {
             timelineProducerService.addQueue(requestTimelineForm);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Failed in requesting the timeline: " + e);
+            System.out.println("Failed in requesting the timeline: " + e);
             return ResponseEntity.internalServerError().build();
         }
     }
