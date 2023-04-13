@@ -1,22 +1,20 @@
-package com.QuackAttack.DirectMessageProducer.producer;
+package com.QuackAttack.DirectMessageConsumer.producer;
 
 import com.QuackAttack.DirectMessageProducer.objects.GetConvoRequest;
 import com.QuackAttack.DirectMessageProducer.objects.MessageRequest;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DirectMessageProducerService {
 
     @Autowired
-    RabbitTemplate rabbitTemplate;
+    JmsTemplate jmsTemplate;
 
     // TODO give the actual queue name in app properties
-    @Value("${directmessage.queue}")
+    @Value("${active-mq.direct-message-queue}")
     private String directMessageQueue;
 
 
@@ -28,8 +26,7 @@ public class DirectMessageProducerService {
     public void addGetConvoQueue(GetConvoRequest request) {
         try {
             System.out.println("Attempting to send request to queue:" + directMessageQueue);
-            String jsonPayload = toJson(request); // Convert object to JSON string
-            rabbitTemplate.convertAndSend(directMessageQueue, jsonPayload);
+            jmsTemplate.convertAndSend(directMessageQueue, request);
         } catch (Exception e) {
             System.out.println("Received Exception during sending to queue: " + e);
         }
@@ -38,8 +35,8 @@ public class DirectMessageProducerService {
     public void addCreateConvoQueue(GetConvoRequest request) {
         try {
             System.out.println("Attempting to send request to queue:" + directMessageQueue);
-            String jsonPayload = toJson(request); // Convert object to JSON string
-            rabbitTemplate.convertAndSend(directMessageQueue, jsonPayload);
+
+            jmsTemplate.convertAndSend(directMessageQueue, request);
         } catch (Exception e) {
             System.out.println("Received Exception during sending to queue: " + e);
         }
@@ -48,20 +45,10 @@ public class DirectMessageProducerService {
     public void addMsgRequestQueue(MessageRequest request) {
         try {
             System.out.println("Attempting to send request to queue:" + directMessageQueue);
-            String jsonPayload = toJson(request); // Convert object to JSON string
-            rabbitTemplate.convertAndSend(directMessageQueue, jsonPayload);
+
+            jmsTemplate.convertAndSend(directMessageQueue, request);
         } catch (Exception e) {
             System.out.println("Received Exception during sending to queue: " + e);
-        }
-    }
-
-    // Utility method to convert object to JSON string, RabbitMQ doesn't like me sending objects straight up
-    private String toJson(Object obj) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         }
     }
 }

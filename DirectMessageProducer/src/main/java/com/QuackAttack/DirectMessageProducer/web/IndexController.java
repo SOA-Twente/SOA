@@ -3,6 +3,7 @@ package com.QuackAttack.DirectMessageProducer.web;
 import com.QuackAttack.DirectMessageProducer.objects.GetConvoRequest;
 import com.QuackAttack.DirectMessageProducer.objects.MessageRequest;
 import com.QuackAttack.DirectMessageProducer.producer.DirectMessageProducerService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class IndexController {
 
+    @Autowired
     private DirectMessageProducerService producerService;
 
     /**
@@ -41,7 +43,7 @@ public class IndexController {
             producerService.addGetConvoQueue(request);
             return ResponseEntity.ok().body("Conversation created");
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Failed in creating a conversation");
+            return ResponseEntity.internalServerError().body("Failed in creating a conversation" + e);
         }
     }
 
