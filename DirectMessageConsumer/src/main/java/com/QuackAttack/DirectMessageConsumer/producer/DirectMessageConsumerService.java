@@ -1,12 +1,18 @@
-package com.QuackAttack.DirectMessageConsumer.service;
+package com.QuackAttack.DirectMessageConsumer.producer;
 
-import com.QuackAttack.DirectMessageConsumer.objects.*;
+import com.QuackAttack.DirectMessageConsumer.objects.Conversation;
+import com.QuackAttack.DirectMessageConsumer.objects.GetConvoRequest;
+import com.QuackAttack.DirectMessageConsumer.objects.Message;
+import com.QuackAttack.DirectMessageConsumer.objects.MessageRequest;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -32,29 +38,31 @@ public class DirectMessageConsumerService {
      * if a conversation with the 2 users already exists, if so, it returns a message that the conversation already
      * exists. Else, it will create a new entry in the database for the conversation and return a message that the
      * conversation has been created.
-     * @param request it receives from the message queue.
+     * @param jsonRequest it receives from the message queue.
      */
     @RabbitListener(queues = "${directmessage.queue}")
     public void createConvo(GetConvoRequest request) {
+
         // create a conversation with the request values, but first check if the conversation exists
         List<Conversation> conversations = doesConvoExists(request);
 
         // if the conversation does not exist, create a new entry with request values
         if (conversations.size() == 0) {
             System.out.println("Conversation does not exist, creating new conversation");
-            String sql = "INSERT INTO conversations (UserInitiator, UserReceiver)";
-
-            int rows = jdbcTemplate.update(sql, request.getInitiator(), request.getReceiver());
+            String sql = "INSERT INTO conversations (UserInitiator, UserReceiver) VALUES (?, ?)";
+            Object[] params = { request.getInitiator(), request.getReceiver() };
+            int rows = jdbcTemplate.update(sql, params);
 
             if (rows > 0) {
                 System.out.println("A new conversation has been created");
             } else {
                 System.out.println("An error in creating a conversation occurred");
-                // TODO return message to original requester that the
+                // TODO return message to original requester that the conversation creation failed
             }
         } else {
             System.out.println("Conversation exists");
         }
+
 
         // TODO return the created conversation or message to the original requester
 
@@ -67,7 +75,7 @@ public class DirectMessageConsumerService {
      * conversation ID. It will then return a list of messages to the original requester. // TODO to be implemented
      * @param request a conversation request.
      */
-    @RabbitListener(queues = "${directmessage.queue}")
+    //@RabbitListener(queues = "${directmessage.queue}")
     public void getConvo(GetConvoRequest request) {
         // request the messages with the found convoID
 
@@ -96,7 +104,7 @@ public class DirectMessageConsumerService {
     }
 
     // TODO specify the send message message queue
-    @RabbitListener(queues = "${directmessage.queue}")
+    //@RabbitListener(queues = "${directmessage.queue}")
     public void sendMsg(MessageRequest request) {
         String sql = "INSERT INTO messages (convoID, sender, receiver, message) VALUES ( ?, ?, ?, ?)";
 
