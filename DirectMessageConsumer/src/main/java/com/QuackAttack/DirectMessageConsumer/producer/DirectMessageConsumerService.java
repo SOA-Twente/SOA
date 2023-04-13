@@ -38,7 +38,7 @@ public class DirectMessageConsumerService {
      * if a conversation with the 2 users already exists, if so, it returns a message that the conversation already
      * exists. Else, it will create a new entry in the database for the conversation and return a message that the
      * conversation has been created.
-     * @param jsonRequest it receives from the message queue.
+     * @param request it receives from the message queue.
      */
     @RabbitListener(queues = "${directmessage.queue}")
     public void createConvo(GetConvoRequest request) {
