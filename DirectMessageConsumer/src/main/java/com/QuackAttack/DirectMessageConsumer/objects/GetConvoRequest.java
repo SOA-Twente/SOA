@@ -1,15 +1,15 @@
 package com.QuackAttack.DirectMessageConsumer.objects;
 public class GetConvoRequest {
-    private String requestType;
     private String callBackURL;
     private String initiator;
     private String receiver;
-    public String getRequestType() {
-        return requestType;
+    private int convoID;
+    public int getConvoID() {
+        return convoID;
     }
 
-    public void setRequestType(String requestType) {
-        this.requestType = requestType;
+    public void setConvoID(int convoID) {
+        this.convoID = convoID;
     }
 
     public String getCallBackURL() {

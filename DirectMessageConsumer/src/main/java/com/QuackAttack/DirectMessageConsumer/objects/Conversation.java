@@ -2,6 +2,14 @@ package com.QuackAttack.DirectMessageConsumer.objects;
 
 
 public class Conversation {
+
+    private int convoID;
+
+    private String userInitiator;
+
+    private String userReceiver;
+
+
     public int getConvoID() {
         return convoID;
     }
@@ -26,9 +34,4 @@ public class Conversation {
         this.userReceiver = userReceiver;
     }
 
-    private int convoID;
-
-    private String userInitiator;
-
-    private String userReceiver;
 }

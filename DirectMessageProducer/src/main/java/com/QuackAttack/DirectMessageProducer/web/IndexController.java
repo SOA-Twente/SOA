@@ -25,7 +25,7 @@ public class IndexController {
     public ResponseEntity sendGetConversation(@RequestBody GetConvoRequest request) {
         try {
             producerService.addGetConvoQueue(request);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok().body("Getting conversation...");
         } catch (Exception e) {
             System.out.println("Failed in sending the request to the get conversation queue: " + e);
             return ResponseEntity.internalServerError().build();
@@ -40,8 +40,8 @@ public class IndexController {
     @PostMapping("/createConvo")
     public ResponseEntity sendCreateConvo(@RequestBody GetConvoRequest request) {
         try {
-            producerService.addGetConvoQueue(request);
-            return ResponseEntity.ok().body("Conversation created");
+            producerService.addCreateConvoQueue(request);
+            return ResponseEntity.ok().body("Conversation request sent");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed in creating a conversation" + e);
         }

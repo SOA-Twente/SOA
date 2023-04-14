@@ -19,9 +19,12 @@ public class DirectMessageProducerService {
     RabbitTemplate rabbitTemplate;
 
     // TODO give the actual queue name in app properties
-    @Value("${directmessage.queue}")
-    private String directMessageQueue;
-
+    @Value("${createConversation.queue}")
+    private String createConvoQ;
+    @Value("${getConversation.queue}")
+    private String getConvoQ;
+    @Value("${sendMessage.queue}")
+    private String sendMsgQ;
 
 
     /**
@@ -30,15 +33,15 @@ public class DirectMessageProducerService {
      */
     public void addGetConvoQueue(GetConvoRequest request) {
         try {
-            System.out.println("Attempting to send request to queue:" + directMessageQueue);
+            System.out.println("Attempting to send request to queue:" + getConvoQ);
             String jsonPayload = toJson(request); // Convert object to JSON string
 
-            // Set content-type to application/json
+            // Set content-type to application/json, this is necessary for consuming
             MessageProperties messageProperties = new MessageProperties();
             messageProperties.setContentType("application/json");
 
             Message message = new Message(jsonPayload.getBytes(), messageProperties);
-            rabbitTemplate.convertAndSend(directMessageQueue, message);
+            rabbitTemplate.convertAndSend(getConvoQ, message);
         } catch (Exception e) {
             System.out.println("Received Exception during sending to queue: " + e);
         }
@@ -46,28 +49,33 @@ public class DirectMessageProducerService {
 
     public void addCreateConvoQueue(GetConvoRequest request) {
         try {
-            System.out.println("Attempting to send request to queue:" + directMessageQueue);
+            System.out.println("Attempting to send request to queue:" + createConvoQ);
+            String jsonPayload = toJson(request); // Convert object to JSON string
 
-            rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter());
-            rabbitTemplate.setExchange(null); // set exchange to null for direct queue
-            rabbitTemplate.setRoutingKey(directMessageQueue); // set routing key to queue name
-            rabbitTemplate.convertAndSend(directMessageQueue, request);
+            // Set content-type to application/json, this is necessary for consuming
+            MessageProperties messageProperties = new MessageProperties();
+            messageProperties.setContentType("application/json");
+
+            Message message = new Message(jsonPayload.getBytes(), messageProperties);
+            rabbitTemplate.convertAndSend(createConvoQ, message);
         } catch (Exception e) {
             System.out.println("Received Exception during sending to queue: " + e);
         }
     }
 
     public void addMsgRequestQueue(MessageRequest request) {
-        try {
-            System.out.println("Attempting to send request to queue:" + directMessageQueue);
-            String jsonPayload = toJson(request); // Convert object to JSON string
-            rabbitTemplate.convertAndSend(directMessageQueue, jsonPayload);
-        } catch (Exception e) {
-            System.out.println("Received Exception during sending to queue: " + e);
-        }
+        System.out.println("Attempting to send request to queue:" + sendMsgQ);
+        String jsonPayload = toJson(request); // Convert object to JSON string
+
+        // Set content-type to application/json, this is necessary for consuming
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType("application/json");
+
+        Message message = new Message(jsonPayload.getBytes(), messageProperties);
+        rabbitTemplate.convertAndSend(sendMsgQ, message);
     }
 
-    // Utility method to convert object to JSON string, RabbitMQ doesn't like me sending objects straight up
+    // Utility method to convert object to JSON string, RabbitMQ doesn't like sending objects straight up
     private String toJson(Object obj) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {

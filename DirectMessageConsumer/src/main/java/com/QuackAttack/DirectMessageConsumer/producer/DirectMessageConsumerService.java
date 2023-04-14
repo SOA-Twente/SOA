@@ -21,20 +21,8 @@ import java.util.List;
 @Component
 public class DirectMessageConsumerService {
 
-    private RestTemplate restTemplate;
-
-    /*
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Value("${service-profile-url}")
-    private String profileServiceURL;
-
-    @Value("${service-postmessage-url}")
-    private String postMessageServiceURL;
-    */
-    @Autowired
-    private ObjectMapper objectMapper;
 
     // TODO specify the get conversation message queue
 
@@ -44,22 +32,12 @@ public class DirectMessageConsumerService {
      * exists. Else, it will create a new entry in the database for the conversation and return a message that the
      * conversation has been created.
      *
-     * @param message it receives from the message queue.
+     * @param request it receives from the message queue.
      */
-    @RabbitListener(queues = "${directmessage.queue}")
-    public void createConvo(GetConvoRequest message) {
-        System.out.println(message.getReceiver() + ":" +  message.getInitiator());
-        /*
-        try {
-            request = objectMapper.readValue(message, GetConvoRequest.class);
-        } catch (JsonMappingException e) {
-            System.out.println("error converting the mapping");
-        } catch (JsonProcessingException e) {
-            System.out.println("error processing the json");
-        }
-*/
+    @RabbitListener(queues = "${createConversation.queue}")
+    public void createConvo(GetConvoRequest request) {
+        System.out.println(request.getReceiver() + ":" + request.getInitiator());
 
-        /*
         // create a conversation with the request values, but first check if the conversation exists
         List<Conversation> conversations = doesConvoExists(request);
 
@@ -67,7 +45,7 @@ public class DirectMessageConsumerService {
         if (conversations.size() == 0) {
             System.out.println("Conversation does not exist, creating new conversation");
             String sql = "INSERT INTO conversations (UserInitiator, UserReceiver) VALUES (?, ?)";
-            Object[] params = { request.getInitiator(), request.getReceiver() };
+            Object[] params = {request.getInitiator(), request.getReceiver()};
             int rows = jdbcTemplate.update(sql, params);
 
             if (rows > 0) {
@@ -77,12 +55,13 @@ public class DirectMessageConsumerService {
                 // TODO return message to original requester that the conversation creation failed
             }
         } else {
-            System.out.println("Conversation exists");
+            System.out.println("Conversation already exists. Returning conversation...");
+            getConvo(request);
         }
 
 
         // TODO return the created conversation or message to the original requester
-        */
+
     }
 
 
@@ -93,11 +72,10 @@ public class DirectMessageConsumerService {
      *
      * @param request a conversation request.
      */
-    //@RabbitListener(queues = "${directmessage.queue}")
+    @RabbitListener(queues = "${getConversation.queue}")
     public void getConvo(GetConvoRequest request) {
         // request the messages with the found convoID
 
-        /*
         List<Conversation> conversations = doesConvoExists(request);
         if (conversations.size() > 0) {
             // return list of messages from the messages table
@@ -111,6 +89,13 @@ public class DirectMessageConsumerService {
                         , new Object[]{conversationID});
 
                 // TODO return the messages to the original requester
+                // to print out messages
+                StringBuilder builder = new StringBuilder();
+                builder.append("ConversationID:" + conversationID + ", messages:");
+                for (Message m : messages) {
+                    builder.append("~" + m.getMessage());
+                }
+                System.out.println(builder);
             } catch (DataAccessException e) {
                 System.out.println("Error querying messages from request init:" + request.getInitiator()
                         + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
@@ -121,13 +106,12 @@ public class DirectMessageConsumerService {
             System.out.println("Conversation does not yet exist, please first make a conversation");
         }
 
-         */
+
     }
 
-    // TODO specify the send message message queue
-    //@RabbitListener(queues = "${directmessage.queue}")
+    @RabbitListener(queues = "${sendMessage.queue}")
     public void sendMsg(MessageRequest request) {
-        /*
+
         String sql = "INSERT INTO messages (convoID, sender, receiver, message) VALUES ( ?, ?, ?, ?)";
 
         try {
@@ -144,7 +128,7 @@ public class DirectMessageConsumerService {
                     + ", receiver: " + request.getReceiver() + ", message : " + request.getMessage());
         }
 
-         */
+
     }
 
     /**
@@ -155,7 +139,7 @@ public class DirectMessageConsumerService {
      */
     public List<Conversation> doesConvoExists(GetConvoRequest request) {
 
-        /*
+
         String sqlIfExist = "SELECT convoID FROM conversations WHERE " +
                 "(UserInitiator = ? AND UserReceiver = ?) OR (UserInitiator = ? AND UserReceiver = ?)";
 
@@ -164,10 +148,5 @@ public class DirectMessageConsumerService {
                 , new Object[]{request.getInitiator(), request.getReceiver(), request.getReceiver(), request.getInitiator()});
 
         return conversationList;
-    }
-
-         */
-
-        return null;
     }
 }

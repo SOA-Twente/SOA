@@ -2,13 +2,7 @@ package com.QuackAttack.DirectMessageProducer.objects;
 
 
 public class MessageRequest {
-    public String getRequestType() {
-        return requestType;
-    }
 
-    public void setRequestType(String requestType) {
-        this.requestType = requestType;
-    }
 
     public String getCallBackURL() {
         return callBackURL;
@@ -50,7 +44,6 @@ public class MessageRequest {
         this.message = message;
     }
 
-    private String requestType;
     private String callBackURL;
     private int convoID;
     private String sender;
