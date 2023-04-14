@@ -1,5 +1,9 @@
 package com.QuackAttack.DirectMessageProducer.objects;
 public class GetConvoRequest {
+    private String requestType;
+    private String callBackURL;
+    private String initiator;
+    private String receiver;
     public String getRequestType() {
         return requestType;
     }
@@ -32,8 +36,5 @@ public class GetConvoRequest {
         this.receiver = receiver;
     }
 
-    private String requestType;
-    private String callBackURL;
-    private String initiator;
-    private String receiver;
+
 }
