@@ -2,18 +2,52 @@ package com.QuackAttack.TimelineApp.objects;
 
 import lombok.Getter;
 import lombok.Setter;
-
 public class Following {
 
-    @Getter
-    @Setter
-    private int ID;
-    @Getter @Setter
-    private int user_ID;
-    @Getter @Setter
-    private int following_ID;
+    private int id;
+    private String user_id;
+    private String following_id;
 
-    public int getID() {
-        return this.ID;
+
+    public Following() {
+    }
+
+    public Following(int id, String user_id, String following_id) {
+        this.id = id;
+        this.user_id = user_id;
+        this.following_id = following_id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getFollowing_id() {
+        return following_id;
+    }
+
+    public void setFollowing_id(String following_id) {
+        this.following_id = following_id;
+    }
+
+    @Override
+    public String toString() {
+        return "Following{" +
+                "id=" + id +
+                ", user_id='" + user_id + '\'' +
+                ", following_id='" + following_id + '\'' +
+                '}';
     }
 }

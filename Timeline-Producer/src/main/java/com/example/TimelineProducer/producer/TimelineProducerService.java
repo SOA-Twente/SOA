@@ -25,11 +25,11 @@ public class TimelineProducerService {
      */
     public void addQueue(RequestTimelineForm request) {
         try {
-            log.info("Attempting to send request to queue:" + queue);
+            System.out.println("Attempting to send request to queue:" + queue);
 
             jmsTemplate.convertAndSend(queue, request);
         } catch (Exception e) {
-            log.error("Received Exception during sending to queue: " + e);
+            System.out.println("Received Exception during sending to queue: " + e);
         }
     }
 }

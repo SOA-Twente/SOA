@@ -1,15 +1,59 @@
 package com.QuackAttack.DirectMessageProducer.objects;
 
-import lombok.Getter;
-import lombok.Setter;
 
 public class MessageRequest {
-    @Getter @Setter
+    public String getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
+    }
+
+    public String getCallBackURL() {
+        return callBackURL;
+    }
+
+    public void setCallBackURL(String callBackURL) {
+        this.callBackURL = callBackURL;
+    }
+
+    public int getConvoID() {
+        return convoID;
+    }
+
+    public void setConvoID(int convoID) {
+        this.convoID = convoID;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
+    }
+
+    public String getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(String receiver) {
+        this.receiver = receiver;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    private String requestType;
+    private String callBackURL;
     private int convoID;
-    @Getter @Setter
-    private int sender;
-    @Getter @Setter
-    private int receiver;
-    @Getter @Setter
+    private String sender;
+    private String receiver;
     private String message;
 }

@@ -17,7 +17,7 @@ docker exec -it profile_postgres psql -U postgres
 
 # Create database
 
-CREATE DATABASE profileDatabase;
+
 
 - database name is now profileDatabase.
 
@@ -58,4 +58,20 @@ id SERIAL PRIMARY KEY,
 username varchar(255) NOT NULL,
 email varchar(255) NOT NULL,
 password varchar(255)
+);
+
+CREATE TABLE Conversations (
+  convoID SERIAL PRIMARY KEY,
+  UserInitiator TEXT,
+  UserReceiver TEXT,
+  CONSTRAINT uc_user_initiator_user_receiver UNIQUE(UserInitiator, UserReceiver)
+);
+
+CREATE TABLE Messages (
+  ID SERIAL PRIMARY KEY,
+  ConvoID INT,
+  Sender TEXT,
+  Receiver TEXT,
+  message TEXT,
+  CONSTRAINT fk_conversations FOREIGN KEY (ConvoID) REFERENCES Conversations(convoID)
 );

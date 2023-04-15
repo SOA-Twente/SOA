@@ -1,10 +1,14 @@
 package com.QuackAttack.DirectMessageConsumer.web;
 
-import com.QuackAttack.DirectMessageConsumer.objects.*;
+import com.QuackAttack.DirectMessageConsumer.objects.Conversation;
+import com.QuackAttack.DirectMessageConsumer.objects.GetConvoRequest;
+import com.QuackAttack.DirectMessageConsumer.objects.Message;
+import com.QuackAttack.DirectMessageConsumer.objects.MessageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -63,7 +67,7 @@ public class IndexController {
 
             try {
                 List<Message> messages = jdbcTemplate.query(sql
-                        , new MessageRowMapper()
+                        , BeanPropertyRowMapper.newInstance(Message.class)
                         , new Object[]{conversationID});
 
                 return messages;
@@ -113,7 +117,7 @@ public class IndexController {
                 "(UserInitiator = ? AND UserReceiver = ?) OR (UserInitiator = ? AND UserReceiver = ?)";
 
         List<Conversation> conversationList = jdbcTemplate.query(sqlIfExist
-                , new ConversationRowMapper()
+                , BeanPropertyRowMapper.newInstance(Conversation.class)
                 , new Object[]{request.getInitiator(), request.getReceiver(), request.getReceiver(), request.getInitiator()});
 
         return conversationList;

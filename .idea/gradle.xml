@@ -11,11 +11,19 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/DirectMessage-Consumer" />
+            <option value="$PROJECT_DIR$/DirectMessage-Producer" />
+            <option value="$PROJECT_DIR$/DirectMessageApp" />
+            <option value="$PROJECT_DIR$/DirectMessageConsumer" />
+            <option value="$PROJECT_DIR$/DirectMessageProducer" />
             <option value="$PROJECT_DIR$/FollowApp" />
             <option value="$PROJECT_DIR$/PostMessageApp" />
             <option value="$PROJECT_DIR$/ProfileApp" />
             <option value="$PROJECT_DIR$/RegisterApp" />
             <option value="$PROJECT_DIR$/SearchApp" />
+            <option value="$PROJECT_DIR$/Timeline-Consumer" />
+            <option value="$PROJECT_DIR$/Timeline-Producer" />
+            <option value="$PROJECT_DIR$/TimelineApp" />
             <option value="$PROJECT_DIR$/Utils" />
             <option value="$PROJECT_DIR$/clients" />
           </set>
