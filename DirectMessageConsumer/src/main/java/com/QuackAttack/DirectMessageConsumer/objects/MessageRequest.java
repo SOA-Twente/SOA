@@ -1,17 +1,7 @@
 package com.QuackAttack.DirectMessageConsumer.objects;
 
 
-public class MessageRequest {
-
-
-    public String getCallBackURL() {
-        return callBackURL;
-    }
-
-    public void setCallBackURL(String callBackURL) {
-        this.callBackURL = callBackURL;
-    }
-
+public class MessageRequest implements Request{
     public int getConvoID() {
         return convoID;
     }
@@ -26,6 +16,11 @@ public class MessageRequest {
 
     public void setSender(String sender) {
         this.sender = sender;
+    }
+
+    @Override
+    public Object getInitiator() {
+        return this.sender;
     }
 
     public String getReceiver() {
@@ -44,7 +39,15 @@ public class MessageRequest {
         this.message = message;
     }
 
-    private String callBackURL;
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public void setCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
+    }
+
+    private String correlationID;
     private int convoID;
     private String sender;
     private String receiver;

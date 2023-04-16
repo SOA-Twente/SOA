@@ -1,21 +1,27 @@
 package com.QuackAttack.DirectMessageConsumer.producer;
 
-import com.QuackAttack.DirectMessageConsumer.objects.Conversation;
-import com.QuackAttack.DirectMessageConsumer.objects.GetConvoRequest;
-import com.QuackAttack.DirectMessageConsumer.objects.Message;
-import com.QuackAttack.DirectMessageConsumer.objects.MessageRequest;
+import com.QuackAttack.DirectMessageConsumer.objects.*;
+import com.QuackAttack.DirectMessageConsumer.websockets.MyWebSocketHandler;
+import com.QuackAttack.DirectMessageConsumer.websockets.WebSocketConfig;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.amqp.core.MessageProperties;
+import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
+
+import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -23,8 +29,13 @@ public class DirectMessageConsumerService {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private MyWebSocketHandler webSocketHandler;
 
-    // TODO specify the get conversation message queue
+    @Autowired
+    private WebSocketConfig webSocketConfig;
 
     /**
      * This JmsListener listens on the "create a conversation" queue. It takes requests from that queue and first checks
@@ -35,8 +46,12 @@ public class DirectMessageConsumerService {
      * @param request it receives from the message queue.
      */
     @RabbitListener(queues = "${createConversation.queue}")
-    public void createConvo(GetConvoRequest request) {
+    public void createConvo(CreateConversationRequest request) throws IOException, InterruptedException {
         System.out.println(request.getReceiver() + ":" + request.getInitiator());
+
+        String correlationID = request.getCorrelationID();
+
+        StringBuilder response = new StringBuilder();
 
         // create a conversation with the request values, but first check if the conversation exists
         List<Conversation> conversations = doesConvoExists(request);
@@ -49,19 +64,23 @@ public class DirectMessageConsumerService {
             int rows = jdbcTemplate.update(sql, params);
 
             if (rows > 0) {
-                System.out.println("A new conversation has been created");
+                response = new StringBuilder("A new conversation has been created");
             } else {
-                System.out.println("An error in creating a conversation occurred");
-                // TODO return message to original requester that the conversation creation failed
+                response = new StringBuilder("An error in creating a conversation occurred");
             }
+
         } else {
-            System.out.println("Conversation already exists. Returning conversation...");
-            getConvo(request);
+            response = new StringBuilder("Conversation already exists.");
         }
 
+        if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
+            WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
+            session.sendMessage(new TextMessage(response));
+            session.close();
 
-        // TODO return the created conversation or message to the original requester
-
+        } else {
+            requeueRequest(request);
+        }
     }
 
 
@@ -73,9 +92,12 @@ public class DirectMessageConsumerService {
      * @param request a conversation request.
      */
     @RabbitListener(queues = "${getConversation.queue}")
-    public void getConvo(GetConvoRequest request) {
-        // request the messages with the found convoID
+    public void getConvo(GetConversationRequest request) throws IOException, InterruptedException {
 
+        String correlationID = request.getCorrelationID();
+        System.out.println("get convo consumer");
+
+        StringBuilder response = null;
         List<Conversation> conversations = doesConvoExists(request);
         if (conversations.size() > 0) {
             // return list of messages from the messages table
@@ -86,31 +108,43 @@ public class DirectMessageConsumerService {
             try {
                 List<Message> messages = jdbcTemplate.query(sql
                         , BeanPropertyRowMapper.newInstance(Message.class)
-                        , new Object[]{conversationID});
+                        , conversationID);
 
-                // TODO return the messages to the original requester
-                // to print out messages
-                StringBuilder builder = new StringBuilder();
-                builder.append("ConversationID:" + conversationID + ", messages:");
+                response = new StringBuilder();
+                response.append("ConversationID:").append(conversationID).append(", messages:");
+
                 for (Message m : messages) {
-                    builder.append("~" + m.getMessage());
+                    response.append("~").append(m.getMessage());
                 }
-                System.out.println(builder);
+
             } catch (DataAccessException e) {
-                System.out.println("Error querying messages from request init:" + request.getInitiator()
+                response = new StringBuilder("Error querying messages from request init:" + request.getInitiator()
                         + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
+
                 throw new RuntimeException(e);
             }
 
         } else {
-            System.out.println("Conversation does not yet exist, please first make a conversation");
+            response = new StringBuilder("Conversation does not yet exist, please first make a conversation");
+
         }
 
+        if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
+            WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
+            session.sendMessage(new TextMessage(response));
+            session.close();
+
+        } else {
+            requeueRequest(request);
+        }
 
     }
 
     @RabbitListener(queues = "${sendMessage.queue}")
-    public void sendMsg(MessageRequest request) {
+    public void sendMsg(MessageRequest request) throws IOException {
+        String correlationID = request.getCorrelationID();
+
+        StringBuilder response = null;
 
         String sql = "INSERT INTO messages (convoID, sender, receiver, message) VALUES ( ?, ?, ?, ?)";
 
@@ -119,17 +153,30 @@ public class DirectMessageConsumerService {
             if (rows > 0) {
                 // message was send successfully
                 System.out.println("message was sent");
+                response = new StringBuilder("message was sent");
+
             } else {
-                System.out.println("message was not sent, error location is direct quack");
+                response = new StringBuilder("message was not sent, error location is direct quack");
             }
 
         } catch (DataAccessException e) {
-            System.out.println("Error sending the message for request: " + request.getReceiver() + ", sender: " + request.getSender()
-                    + ", receiver: " + request.getReceiver() + ", message : " + request.getMessage());
+            response = new StringBuilder(
+                    "Error sending the message for request: " + request.getReceiver() +
+                            ", sender: " + request.getSender() +
+                            ", receiver: " + request.getReceiver() +
+                            ", message : " + request.getMessage());
         }
 
+        if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
+            WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
+            session.sendMessage(new TextMessage(response));
+            session.close();
 
+        } else {
+            requeueRequest(request);
+        }
     }
+
 
     /**
      * Help function to check if the conversation already exists in the database.
@@ -137,16 +184,49 @@ public class DirectMessageConsumerService {
      * @param request for a conversation with a conversation ID.
      * @return a list containing the conversation.
      */
-    public List<Conversation> doesConvoExists(GetConvoRequest request) {
+    public List<Conversation> doesConvoExists(Request request) {
 
 
         String sqlIfExist = "SELECT convoID FROM conversations WHERE " +
                 "(UserInitiator = ? AND UserReceiver = ?) OR (UserInitiator = ? AND UserReceiver = ?)";
 
-        List<Conversation> conversationList = jdbcTemplate.query(sqlIfExist
+        return jdbcTemplate.query(sqlIfExist
                 , BeanPropertyRowMapper.newInstance(Conversation.class)
-                , new Object[]{request.getInitiator(), request.getReceiver(), request.getReceiver(), request.getInitiator()});
+                , request.getInitiator(), request.getReceiver(), request.getReceiver(), request.getInitiator());
+    }
 
-        return conversationList;
+    /**
+     * Help function to requeue if the websocket connection does not exist in registry.
+     * Checks the class it belongs to and re-queues the request.
+     *
+     * @param request to requeue
+     */
+    public void requeueRequest(Request request) {
+
+        String jsonPayload = toJson(request); // Convert object to JSON string
+
+        // Set content-type to application/json, this is necessary for consuming
+        MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType("application/json");
+
+        org.springframework.amqp.core.Message message = new org.springframework.amqp.core.Message(jsonPayload.getBytes(), messageProperties);
+
+        if (request.getClass() == CreateConversationRequest.class) {
+            rabbitTemplate.convertAndSend("${createConversation.queue}", message);
+        } else if (request.getClass() == GetConversationRequest.class) {
+            rabbitTemplate.convertAndSend("${getConversation.queue}", message);
+        } else {
+            rabbitTemplate.convertAndSend("${sendMessage.queue}", message);
+        }
+    }
+
+    // Utility method to convert object to JSON string, RabbitMQ doesn't like sending objects straight up
+    private String toJson(Object obj) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
