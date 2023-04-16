@@ -6,7 +6,7 @@ import org.springframework.web.socket.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-@Component
+@Component("myWebSocketHandler")
 public class MyWebSocketHandler implements WebSocketHandler {
 
     public static ConcurrentHashMap<String, WebSocketSession> getRegistry() {
@@ -16,22 +16,24 @@ public class MyWebSocketHandler implements WebSocketHandler {
     private static ConcurrentHashMap<String, WebSocketSession> registry = new ConcurrentHashMap<>();
 
     @Override
-    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        try {
-
-            String correlationID = session.getUri().getPath().split("/")[3]; // extract correlationId from WebSocket URL
-            registry.put(correlationID, session);
-
-            System.out.println(registry.toString());
-            session.sendMessage(new TextMessage(" hello "));
-        } catch (Exception e) {
-            System.out.println("Failed to get correlationID");
-        }
+    public void afterConnectionEstablished(WebSocketSession session) {
+        String correlationID = session.getUri().getPath().split("/")[3]; // extract correlationId from WebSocket URL
+        registry.put(correlationID, session);
+        System.out.println( "last registry entry:"+ correlationID);
+        System.out.println("registry: " + registry.toString());
     }
 
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
-        // Consumer does not receive websocket messages
+        String receivedMessage = message.getPayload().toString();
+
+        if (receivedMessage.startsWith("received")) {
+            String correlationID = session.getUri().getPath().split("/")[3]; // extract correlationId from WebSocket URL
+            registry.remove(correlationID, session);
+            System.out.println("CorrelationID removed: " + correlationID);
+            session.close();
+        }
+
     }
 
     @Override
@@ -43,7 +45,6 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
         // Handle WebSocket connection closure
-        // ...
     }
 
     @Override
