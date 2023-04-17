@@ -47,7 +47,6 @@ public class DirectMessageConsumerService {
      * if a conversation with the 2 users already exists, if so, it returns a message that the conversation already
      * exists. Else, it will create a new entry in the database for the conversation and return a message that the
      * conversation has been created.
-     *
      * @param request it receives from the message queue.
      */
     @RabbitListener(queues = "${createConversation.queue}")
@@ -78,7 +77,7 @@ public class DirectMessageConsumerService {
             response = new StringBuilder("Conversation already exists.");
         }
 
-        addToResultBuffer(request, correlationID, response);
+        // addToResultBuffer(request, correlationID, response);
     }
 
 
@@ -91,7 +90,7 @@ public class DirectMessageConsumerService {
      * @param request a conversation request.
      */
     @RabbitListener(queues = "${getConversation.queue}")
-    public void getConvo(GetConversationRequest request) throws IOException {
+    public void getConvo(GetConversationRequest request) throws IOException, InterruptedException {
 
         String correlationID = request.getCorrelationID();
         System.out.println("get convo consumer first part");
@@ -131,14 +130,26 @@ public class DirectMessageConsumerService {
 
         }
 
+        /*
+
         System.out.println("consumer second part");
         System.out.println("In registry: "  + MyWebSocketHandler.getRegistry().containsKey(correlationID));
         addToResultBuffer(request, correlationID, response);
+        */
 
+        if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
+            WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
+            wait(1000);
+            session.sendMessage(new TextMessage("Confirmation:" + response));
+            System.out.println("Confirmation:" + response);
+        } else {
+            System.out.println("requeue");
+            requeueRequest(request);
+        }
     }
 
     @RabbitListener(queues = "${sendMessage.queue}")
-    public void sendMsg(MessageRequest request) throws IOException {
+    public void sendMsg(MessageRequest request) throws IOException, InterruptedException {
         String correlationID = request.getCorrelationID();
 
         StringBuilder response;
@@ -157,6 +168,7 @@ public class DirectMessageConsumerService {
             }
 
         } catch (DataAccessException e) {
+            System.out.println();
             response = new StringBuilder(
                     "Error sending the message for request: " + request.getReceiver() +
                             ", sender: " + request.getSender() +
@@ -165,14 +177,7 @@ public class DirectMessageConsumerService {
         }
 
 
-        if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
-            WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
-            session.sendMessage(new TextMessage(response));
-            session.close();
 
-        } else {
-            requeueRequest(request);
-        }
     }
 
 

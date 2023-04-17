@@ -45,6 +45,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
         // Handle WebSocket connection closure
+
     }
 
     @Override
