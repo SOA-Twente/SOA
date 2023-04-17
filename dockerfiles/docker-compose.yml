@@ -45,3 +45,9 @@ services:
     build: ./docker/register_app/
   search_app:
     build: ./docker/search_app/
+  timeline_app:
+    build: ./docker/timeline_app/
+  directmessageconsumer_app:
+    build: ./docker/directmessageconsumer_app/
+  directmessageproducer_app:
+    build: ./docker/directmessageproducer_app/

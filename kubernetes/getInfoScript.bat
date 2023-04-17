@@ -12,3 +12,11 @@ kubectl exec --stdin --tty %podname% -- /bin/bash -c "PGPASSWORD=root psql -h db
 FOR /F "delims= " %%i IN ('kubectl get pods ^| findstr db-profile') DO set podname=%%i
 kubectl exec --stdin --tty %podname% -- /bin/bash -c "PGPASSWORD=root psql -h db-profile -U postgres db_profile -c 'SELECT * FROM userdata;'"
 
+
+FOR /F "delims= " %%i IN ('kubectl get pods ^| findstr db-directmessage') DO set podname=%%i
+kubectl exec --stdin --tty %podname% -- /bin/bash -c "PGPASSWORD=root psql -h db-directmessage -U postgres db_directmessage -c 'SELECT * FROM conversations;'"
+
+
+FOR /F "delims= " %%i IN ('kubectl get pods ^| findstr db-directmessage') DO set podname=%%i
+kubectl exec --stdin --tty %podname% -- /bin/bash -c "PGPASSWORD=root psql -h db-directmessage -U postgres db_directmessage -c 'SELECT * FROM Messages;'"
+

@@ -27,3 +27,18 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
+task moveJar(type: Copy){
+	from "${buildDir}/libs"
+	into "${buildDir}/../../jar"
+	include "*.jar"
+}
+task moveJarDocker(type: Copy){
+	from "${buildDir}/libs"
+	into "${buildDir}/../../dockerfiles/docker/directmessageconsumer_app"
+	include "*.jar"
+}
+
+tasks.moveJarDocker.dependsOn(build)
+tasks.moveJar.dependsOn(moveJarDocker)
