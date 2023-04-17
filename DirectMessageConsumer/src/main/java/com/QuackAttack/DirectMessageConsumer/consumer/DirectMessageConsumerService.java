@@ -8,6 +8,7 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataAccessException;
@@ -35,6 +36,15 @@ public class DirectMessageConsumerService {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Value("${createConversation.queue}")
+    private String createConvoQ;
+    @Value("${getConversation.queue}")
+    private String getConvoQ;
+    @Value("${sendMessage.queue}")
+    private String sendMsgQ;
+    @Value("${requeue.queue}")
+    private String requeueQ;
 
     public Map<String, String> getResults() {
         return results;
@@ -140,9 +150,9 @@ public class DirectMessageConsumerService {
 
         if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
             WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
-            wait(1000);
             session.sendMessage(new TextMessage("Confirmation:" + response));
             System.out.println("Confirmation:" + response);
+
         } else {
             System.out.println("requeue");
             requeueRequest(request);
@@ -212,14 +222,24 @@ public class DirectMessageConsumerService {
         messageProperties.setContentType("application/json");
 
         org.springframework.amqp.core.Message message = new org.springframework.amqp.core.Message(jsonPayload.getBytes(), messageProperties);
+        System.out.println("in requeue method, before check");
 
-        if (request.getClass() == CreateConversationRequest.class) {
-            rabbitTemplate.convertAndSend("${createConversation.queue}", message);
-        } else if (request.getClass() == GetConversationRequest.class) {
-            rabbitTemplate.convertAndSend("${getConversation.queue}", message);
+        if (request instanceof CreateConversationRequest) {
+            System.out.println("in requeue method, in check");
+
+            rabbitTemplate.convertAndSend(requeueQ, message);
+
+        } else if (request instanceof GetConversationRequest) {
+            System.out.println("in requeue method, in check");
+
+            rabbitTemplate.convertAndSend(requeueQ, message);
         } else {
-            rabbitTemplate.convertAndSend("${sendMessage.queue}", message);
+            System.out.println("in requeue method, in check");
+
+            rabbitTemplate.convertAndSend(requeueQ, message);
         }
+        System.out.println("in requeue method, after check");
+
     }
 
 
