@@ -1,4 +1,4 @@
-package com.QuackAttack.DirectMessageConsumer.producer;
+package com.QuackAttack.DirectMessageConsumer.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;

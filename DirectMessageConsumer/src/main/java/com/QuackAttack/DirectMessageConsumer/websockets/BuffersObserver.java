@@ -1,6 +1,6 @@
 package com.QuackAttack.DirectMessageConsumer.websockets;
 
-import com.QuackAttack.DirectMessageConsumer.producer.DirectMessageConsumerService;
+import com.QuackAttack.DirectMessageConsumer.consumer.DirectMessageConsumerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

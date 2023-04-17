@@ -1,4 +1,4 @@
-package com.QuackAttack.DirectMessageConsumer.producer;
+package com.QuackAttack.DirectMessageConsumer.consumer;
 
 import com.QuackAttack.DirectMessageConsumer.objects.*;
 import com.QuackAttack.DirectMessageConsumer.websockets.MyWebSocketHandler;
@@ -130,6 +130,7 @@ public class DirectMessageConsumerService {
 
         }
 
+        System.out.println("response: " + response);
         /*
 
         System.out.println("consumer second part");
