@@ -45,7 +45,7 @@ following_id varchar NOT NULL
 CREATE TABLE quacks(
 id SERIAL PRIMARY KEY,
 user_id varchar NOT NULL,
-quack varchar(300) NOT NULL,
+quack varchar(281) NOT NULL,
 is_reply boolean,
 reply_to_quack_id int,
 is_retweet boolean,
@@ -62,16 +62,16 @@ password varchar(255)
 
 CREATE TABLE Conversations (
   convoID SERIAL PRIMARY KEY,
-  UserInitiator TEXT,
-  UserReceiver TEXT,
+  UserInitiator varchar(255),
+  UserReceiver varchar(255)
   CONSTRAINT uc_user_initiator_user_receiver UNIQUE(UserInitiator, UserReceiver)
 );
 
 CREATE TABLE Messages (
   ID SERIAL PRIMARY KEY,
   ConvoID INT,
-  Sender TEXT,
-  Receiver TEXT,
-  message TEXT,
+  Sender varchar(255),
+  Receiver varchar(255)
+  message varchar(255),
   CONSTRAINT fk_conversations FOREIGN KEY (ConvoID) REFERENCES Conversations(convoID)
 );

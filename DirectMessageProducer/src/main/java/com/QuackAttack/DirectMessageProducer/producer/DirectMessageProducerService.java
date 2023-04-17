@@ -1,13 +1,13 @@
 package com.QuackAttack.DirectMessageProducer.producer;
 
-import com.QuackAttack.DirectMessageProducer.objects.GetConvoRequest;
+import com.QuackAttack.DirectMessageProducer.objects.CreateConversationRequest;
+import com.QuackAttack.DirectMessageProducer.objects.GetConversationRequest;
 import com.QuackAttack.DirectMessageProducer.objects.MessageRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -31,7 +31,7 @@ public class DirectMessageProducerService {
      * addQueue will send a message to the specified message queue.
      * @param request is received from the UI, this is a RequestTimelineForm
      */
-    public void addGetConvoQueue(GetConvoRequest request) {
+    public void addGetConvoQueue(GetConversationRequest request, String correlationID) {
         try {
             System.out.println("Attempting to send request to queue:" + getConvoQ);
             String jsonPayload = toJson(request); // Convert object to JSON string
@@ -47,7 +47,7 @@ public class DirectMessageProducerService {
         }
     }
 
-    public void addCreateConvoQueue(GetConvoRequest request) {
+    public void addCreateConvoQueue(CreateConversationRequest request, String correlationID) {
         try {
             System.out.println("Attempting to send request to queue:" + createConvoQ);
             String jsonPayload = toJson(request); // Convert object to JSON string
@@ -63,7 +63,7 @@ public class DirectMessageProducerService {
         }
     }
 
-    public void addMsgRequestQueue(MessageRequest request) {
+    public void addMsgRequestQueue(MessageRequest request, String correlationID) {
         System.out.println("Attempting to send request to queue:" + sendMsgQ);
         String jsonPayload = toJson(request); // Convert object to JSON string
 

@@ -4,14 +4,13 @@ package com.QuackAttack.DirectMessageProducer.objects;
 public class MessageRequest {
 
 
-    public String getCallBackURL() {
-        return callBackURL;
+    public String getCorrelationID() {
+        return correlationID;
     }
 
-    public void setCallBackURL(String callBackURL) {
-        this.callBackURL = callBackURL;
+    public void setCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
     }
-
     public int getConvoID() {
         return convoID;
     }
@@ -44,7 +43,7 @@ public class MessageRequest {
         this.message = message;
     }
 
-    private String callBackURL;
+    private String correlationID;
     private int convoID;
     private String sender;
     private String receiver;

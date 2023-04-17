@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: directmessageproducer-app-dep
+  namespace: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: directmessageproducer-app
+  template:
+    metadata:
+      labels:
+        app: directmessageproducer-app
+    spec:
+      containers:
+      - name: directmessageproducer-app
+        image: dockerfiles-directmessageproducer_app
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8088
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: directmessageproducer-app-sev
+  namespace: production
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 8088
+    targetPort: 8088
+  selector:
+    app: directmessageproducer-app

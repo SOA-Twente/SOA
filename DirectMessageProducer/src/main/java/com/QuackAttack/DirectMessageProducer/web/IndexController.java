@@ -1,16 +1,17 @@
 package com.QuackAttack.DirectMessageProducer.web;
 
-import com.QuackAttack.DirectMessageProducer.objects.GetConvoRequest;
+import com.QuackAttack.DirectMessageProducer.objects.CreateConversationRequest;
+import com.QuackAttack.DirectMessageProducer.objects.GetConversationRequest;
 import com.QuackAttack.DirectMessageProducer.objects.MessageRequest;
 import com.QuackAttack.DirectMessageProducer.producer.DirectMessageProducerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID; // Import UUID for generating correlation ID
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class IndexController {
 
     @Autowired
@@ -18,14 +19,22 @@ public class IndexController {
 
     /**
      * Sends a get conversation request to its message queue.
-     * @param request for a conversation with an initiator and receiver.
-     * @return // TODO implement some identifier to send the information back to
+     * @return ResponseEntity with correlation ID as a response header
      */
     @GetMapping("/getConvo")
-    public ResponseEntity sendGetConversation(@RequestBody GetConvoRequest request) {
+    public ResponseEntity sendGetConversation(@RequestHeader String initiator,
+                                              @RequestHeader String receiver,
+                                              @RequestHeader int conversationID) {
         try {
-            producerService.addGetConvoQueue(request);
-            return ResponseEntity.ok().body("Getting conversation...");
+            String correlationId = generateCorrelationId(); // Generate correlation ID
+            System.out.println(correlationId);
+            GetConversationRequest request = new GetConversationRequest();
+            request.setInitiator(initiator);
+            request.setReceiver(receiver);
+            request.setConvoID(conversationID);
+            request.setCorrelationID(correlationId);
+            producerService.addGetConvoQueue(request, correlationId); // Pass correlation ID to producer service
+            return ResponseEntity.ok().body(correlationId);
         } catch (Exception e) {
             System.out.println("Failed in sending the request to the get conversation queue: " + e);
             return ResponseEntity.internalServerError().build();
@@ -33,33 +42,44 @@ public class IndexController {
     }
 
     /**
-     * Sends a create a conversation request its message queue.
+     * Sends a create a conversation request to its message queue.
      * @param request for a conversation with an initiator and receiver.
-     * @return // TODO implement some identifier to send the information back to
+     * @return ResponseEntity with correlation ID as a response header
      */
     @PostMapping("/createConvo")
-    public ResponseEntity sendCreateConvo(@RequestBody GetConvoRequest request) {
+    public ResponseEntity sendCreateConvo(@RequestBody CreateConversationRequest request) {
         try {
-            producerService.addCreateConvoQueue(request);
-            return ResponseEntity.ok().body("Conversation request sent");
+            String correlationId = generateCorrelationId(); // Generate correlation ID
+            System.out.println(" 1123" + correlationId);
+            producerService.addCreateConvoQueue(request, correlationId); // Pass correlation ID to producer service
+            return ResponseEntity.ok().header("CorrelationID", correlationId).body("Conversation request sent");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed in creating a conversation" + e);
         }
     }
 
     /**
-     * Sends a message request to its message queue
-     * @param request for a message with a conversation ID,
-     * @return // TODO implement some identifier to send the information back to
+     * Sends a message request to its message queue.
+     * @param request for a message with a conversation ID.
+     * @return ResponseEntity with correlation ID as a response header
      */
     @PostMapping("/sendMsg")
     public ResponseEntity sendMessageRequest(@RequestBody MessageRequest request) {
         try {
-            producerService.addMsgRequestQueue(request);
-            return ResponseEntity.ok().body("Message sent successfully");
+            String correlationId = generateCorrelationId(); // Generate correlation ID
+            producerService.addMsgRequestQueue(request, correlationId); // Pass correlation ID to producer service
+            return ResponseEntity.ok().header("CorrelationID", correlationId).body("Message sent successfully");
         } catch (Exception e) {
             System.out.println("Failed in requesting the timeline: " + e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    /**
+     * Generates a unique correlation ID using UUID.
+     * @return String representing the correlation ID
+     */
+    private String generateCorrelationId() {
+        return UUID.randomUUID().toString();
     }
 }
