@@ -15,6 +15,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     private static ConcurrentHashMap<String, WebSocketSession> registry = new ConcurrentHashMap<>();
 
+
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
         String correlationID = session.getUri().getPath().split("/")[3]; // extract correlationId from WebSocket URL
@@ -29,6 +30,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
         if (receivedMessage.startsWith("received")) {
             String correlationID = session.getUri().getPath().split("/")[3]; // extract correlationId from WebSocket URL
+            System.out.println("correlationID found from path by server side: " + correlationID);
             registry.remove(correlationID, session);
             System.out.println("CorrelationID removed: " + correlationID);
             session.close();

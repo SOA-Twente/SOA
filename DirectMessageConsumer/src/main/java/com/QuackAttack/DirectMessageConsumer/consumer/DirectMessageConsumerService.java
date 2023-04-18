@@ -148,16 +148,10 @@ public class DirectMessageConsumerService {
         addToResultBuffer(request, correlationID, response);
         */
 
-        if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
-            WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
-            session.sendMessage(new TextMessage("Confirmation:" + response));
-            System.out.println("Confirmation:" + response);
-
-        } else {
-            System.out.println("requeue");
-            requeueRequest(request);
-        }
+        sendResponseIfInRegistry(request, correlationID, response);
     }
+
+
 
     @RabbitListener(queues = "${sendMessage.queue}")
     public void sendMsg(MessageRequest request) throws IOException, InterruptedException {
@@ -198,14 +192,31 @@ public class DirectMessageConsumerService {
      * @return a list containing the conversation.
      */
     public List<Conversation> doesConvoExists(Request request) {
-
-
         String sqlIfExist = "SELECT convoID FROM conversations WHERE " +
                 "(UserInitiator = ? AND UserReceiver = ?) OR (UserInitiator = ? AND UserReceiver = ?)";
 
         return jdbcTemplate.query(sqlIfExist
                 , BeanPropertyRowMapper.newInstance(Conversation.class)
                 , request.getInitiator(), request.getReceiver(), request.getReceiver(), request.getInitiator());
+    }
+
+    /**
+     * This method checks if the websocket is available in the current Websocket server, otherwise requeue the request.
+     * @param request to requeue if the correlationID is not in the Websocket registry.
+     * @param correlationID to find the Websocket session in the registry.
+     * @param response to send back to the individual Websocket.
+     * @throws IOException
+     */
+    private void sendResponseIfInRegistry(GetConversationRequest request, String correlationID, StringBuilder response) throws IOException {
+        if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
+            WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
+            session.sendMessage(new TextMessage("Confirmation:" + response));
+            System.out.println("Confirmation:" + response);
+
+        } else {
+            System.out.println("requeue");
+            requeueRequest(request);
+        }
     }
 
     /**
@@ -226,17 +237,14 @@ public class DirectMessageConsumerService {
 
         if (request instanceof CreateConversationRequest) {
             System.out.println("in requeue method, in check");
-
-            rabbitTemplate.convertAndSend(requeueQ, message);
+            rabbitTemplate.convertAndSend(createConvoQ, message);
 
         } else if (request instanceof GetConversationRequest) {
             System.out.println("in requeue method, in check");
-
-            rabbitTemplate.convertAndSend(requeueQ, message);
+            rabbitTemplate.convertAndSend(getConvoQ, message);
         } else {
             System.out.println("in requeue method, in check");
-
-            rabbitTemplate.convertAndSend(requeueQ, message);
+            rabbitTemplate.convertAndSend(sendMsgQ, message);
         }
         System.out.println("in requeue method, after check");
 
@@ -255,21 +263,5 @@ public class DirectMessageConsumerService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Utility method to send the response to the correct websocket session.
-     * @param request to get the correlationID from.
-     * @param correlationID to locate the websocket session with.
-     * @param response to send to the websocket session.
-     * @throws IOException
-     */
-    private void addToResultBuffer(Request request, String correlationID, StringBuilder response) throws IOException {
-
-            StringBuilder confirmation = new StringBuilder("Confirmation");
-            confirmation.append(response);
-            results.put(correlationID, String.valueOf(confirmation));
-            System.out.println("last result entry:" + correlationID);
-            System.out.println("results:"+ results.toString());
     }
 }
