@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.core.annotation.Order;
@@ -19,8 +18,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This service consumes requests from the message queue and sends the results back to the original requester. This
@@ -32,25 +29,22 @@ import java.util.concurrent.ConcurrentHashMap;
 @Order(2)
 @DependsOn("myWebSocketHandler")
 public class DirectMessageConsumerService {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private final JdbcTemplate jdbcTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     @Value("${createConversation.queue}")
-    private String createConvoQ;
+    private String createConversationQueue;
     @Value("${getConversation.queue}")
-    private String getConvoQ;
+    private String getConversationQueue;
     @Value("${sendMessage.queue}")
-    private String sendMsgQ;
-    @Value("${requeue.queue}")
-    private String requeueQ;
+    private String sendMessageQueue;
 
-    public Map<String, String> getResults() {
-        return results;
+
+    public DirectMessageConsumerService(JdbcTemplate jdbcTemplate, RabbitTemplate rabbitTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
-    private Map<String, String> results = new ConcurrentHashMap<>();
 
     /**
      * This JmsListener listens on the "create a conversation" queue. It takes requests from that queue and first checks
@@ -101,7 +95,7 @@ public class DirectMessageConsumerService {
      * @param request a conversation request.
      */
     @RabbitListener(queues = "${getConversation.queue}")
-    public void getConvo(GetConversationRequest request) throws IOException, InterruptedException {
+    public void getConvo(GetConversationRequest request) throws IOException {
 
         String correlationID = request.getCorrelationID();
         System.out.println("get convo consumer first part");
@@ -230,14 +224,14 @@ public class DirectMessageConsumerService {
 
         if (request instanceof CreateConversationRequest) {
             System.out.println("in requeue method, in check");
-            rabbitTemplate.convertAndSend(createConvoQ, message);
+            rabbitTemplate.convertAndSend(createConversationQueue, message);
 
         } else if (request instanceof GetConversationRequest) {
             System.out.println("in requeue method, in check");
-            rabbitTemplate.convertAndSend(getConvoQ, message);
+            rabbitTemplate.convertAndSend(getConversationQueue, message);
         } else {
             System.out.println("in requeue method, in check");
-            rabbitTemplate.convertAndSend(sendMsgQ, message);
+            rabbitTemplate.convertAndSend(sendMessageQueue, message);
         }
         System.out.println("in requeue method, after check");
 

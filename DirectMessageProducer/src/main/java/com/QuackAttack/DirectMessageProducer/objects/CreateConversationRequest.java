@@ -1,5 +1,5 @@
 package com.QuackAttack.DirectMessageProducer.objects;
-public class CreateConversationRequest {
+public class CreateConversationRequest implements Request {
 
     private String correlationID;
 

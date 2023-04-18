@@ -1,6 +1,9 @@
 package com.QuackAttack.DirectMessageProducer.objects;
 
-public class GetConversationRequest {
+public class GetConversationRequest implements Request{
+    public GetConversationRequest(String initiator, String receiver, String correlationId) {
+    }
+
     public String getCorrelationID() {
         return correlationID;
     }

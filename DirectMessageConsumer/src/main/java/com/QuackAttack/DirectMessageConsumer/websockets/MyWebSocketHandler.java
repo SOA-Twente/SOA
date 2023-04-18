@@ -3,6 +3,8 @@ package com.QuackAttack.DirectMessageConsumer.websockets;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
+import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -13,39 +15,47 @@ public class MyWebSocketHandler implements WebSocketHandler {
         return registry;
     }
 
-    private static ConcurrentHashMap<String, WebSocketSession> registry = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WebSocketSession> registry = new ConcurrentHashMap<>();
 
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        String correlationID = session.getUri().getPath().split("/")[3]; // extract correlationId from WebSocket URL
+        String correlationID = Objects.requireNonNull(session.getUri()).getPath().split("/")[3]; // extract correlationId from WebSocket URL
+
+
         registry.put(correlationID, session);
-        System.out.println( "last registry entry:"+ correlationID);
-        System.out.println("registry: " + registry.toString());
+        System.out.println("last registry entry:" + correlationID);
+        System.out.println("registry: " + registry);
     }
 
     @Override
-    public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+    public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) {
         String receivedMessage = message.getPayload().toString();
 
         if (receivedMessage.startsWith("received")) {
-            String correlationID = session.getUri().getPath().split("/")[3]; // extract correlationId from WebSocket URL
+            String correlationID = Objects.requireNonNull(session.getUri()).getPath().split("/")[3]; // extract correlationId from WebSocket URL
             System.out.println("correlationID found from path by server side: " + correlationID);
             registry.remove(correlationID, session);
             System.out.println("CorrelationID removed: " + correlationID);
-            session.close();
+
+            try {
+                System.out.println("Closing session for correlationID: " + correlationID);
+                session.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
     }
 
     @Override
-    public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
+    public void handleTransportError(WebSocketSession session, Throwable exception) {
         // Handle WebSocket transport error
         // ...
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
+    public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
         // Handle WebSocket connection closure
 
     }
