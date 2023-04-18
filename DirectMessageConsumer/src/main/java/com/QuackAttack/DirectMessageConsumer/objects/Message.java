@@ -2,6 +2,13 @@ package com.QuackAttack.DirectMessageConsumer.objects;
 
 
 public class Message {
+
+    private int ID;
+    private int convoID;
+    private String sender;
+    private String receiver;
+    private String message;
+    private String createdAt;
     public int getID() {
         return ID;
     }
@@ -42,9 +49,11 @@ public class Message {
         this.message = message;
     }
 
-    private int ID;
-    private int convoID;
-    private String sender;
-    private String receiver;
-    private String message;
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
 }

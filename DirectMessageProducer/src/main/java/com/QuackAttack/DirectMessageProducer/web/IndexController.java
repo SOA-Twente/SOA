@@ -19,6 +19,7 @@ public class IndexController {
 
     /**
      * Sends a get conversation request to its message queue.
+     *
      * @return ResponseEntity with correlation ID as a response header
      */
     @GetMapping("/getConvo")
@@ -44,6 +45,7 @@ public class IndexController {
 
     /**
      * Sends a create a conversation request to its message queue.
+     *
      * @param request for a conversation with an initiator and receiver.
      * @return ResponseEntity with correlation ID as a response header
      */
@@ -51,9 +53,15 @@ public class IndexController {
     public ResponseEntity sendCreateConversation(@RequestBody CreateConversationRequest request) {
         try {
             String correlationId = generateCorrelationId(); // Generate correlation ID
-            System.out.println(" 1123" + correlationId);
+            request.setCorrelationID(correlationId);
+//
+//
+//            System.out.println(correlationId);
             producerService.addCreateConversationQueue(request); // Pass correlation ID to producer service
-            return ResponseEntity.ok().header("CorrelationID", correlationId).body("Conversation request sent");
+            System.out.println(request.toString());
+
+            return ResponseEntity.ok().body(correlationId);
+
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed in creating a conversation" + e);
         }
@@ -61,6 +69,7 @@ public class IndexController {
 
     /**
      * Sends a message request to its message queue.
+     *
      * @param request for a message with a conversation ID.
      * @return ResponseEntity with correlation ID as a response header
      */
@@ -68,8 +77,9 @@ public class IndexController {
     public ResponseEntity sendMessageRequest(@RequestBody MessageRequest request) {
         try {
             String correlationId = generateCorrelationId(); // Generate correlation ID
+
             producerService.addMsgRequestQueue(request); // Pass correlation ID to producer service
-            return ResponseEntity.ok().header("CorrelationID", correlationId).body("Message sent successfully");
+            return ResponseEntity.ok().body(correlationId);
         } catch (Exception e) {
             System.out.println("Failed in requesting the timeline: " + e);
             return ResponseEntity.internalServerError().build();
@@ -78,6 +88,7 @@ public class IndexController {
 
     /**
      * Generates a unique correlation ID using UUID.
+     *
      * @return String representing the correlation ID
      */
     private String generateCorrelationId() {

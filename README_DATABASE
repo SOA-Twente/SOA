@@ -17,8 +17,6 @@ docker exec -it profile_postgres psql -U postgres
 
 # Create database
 
-
-
 - database name is now profileDatabase.
 
 # connect to profileDatabase
@@ -73,5 +71,6 @@ CREATE TABLE Messages (
   Sender TEXT,
   Receiver TEXT,
   message TEXT,
+  createdAt TIMESTAMP DEFAULT NOW(),
   CONSTRAINT fk_conversations FOREIGN KEY (ConvoID) REFERENCES Conversations(convoID)
 );

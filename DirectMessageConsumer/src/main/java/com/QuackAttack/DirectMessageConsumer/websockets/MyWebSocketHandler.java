@@ -22,7 +22,6 @@ public class MyWebSocketHandler implements WebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         String correlationID = Objects.requireNonNull(session.getUri()).getPath().split("/")[3]; // extract correlationId from WebSocket URL
 
-
         registry.put(correlationID, session);
         System.out.println("last registry entry:" + correlationID);
         System.out.println("registry: " + registry);

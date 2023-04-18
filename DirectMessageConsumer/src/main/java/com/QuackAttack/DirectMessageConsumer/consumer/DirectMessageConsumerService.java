@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,6 +56,7 @@ public class DirectMessageConsumerService {
      */
     @RabbitListener(queues = "${createConversation.queue}")
     public void createConvo(CreateConversationRequest request) throws IOException {
+        System.out.println("create convo first part");
         System.out.println(request.getReceiver() + ":" + request.getInitiator());
 
         String correlationID = request.getCorrelationID();
@@ -101,10 +103,9 @@ public class DirectMessageConsumerService {
         System.out.println("get convo consumer first part");
         System.out.println("In registry: "  + MyWebSocketHandler.getRegistry().containsKey(correlationID));
 
-
-
         StringBuilder response;
         List<Conversation> conversations = doesConvoExists(request);
+
         if (conversations.size() > 0) {
             // return list of messages from the messages table
             int conversationID = conversations.get(0).getConvoID();
@@ -116,18 +117,15 @@ public class DirectMessageConsumerService {
                         , BeanPropertyRowMapper.newInstance(Message.class)
                         , conversationID);
 
-                response = new StringBuilder();
-                response.append("ConversationID:").append(conversationID).append(", messages:");
+                String messagesJson = toJson(messages);
 
-                for (Message m : messages) {
-                    response.append("~").append(m.getMessage());
-                }
+                response = new StringBuilder();
+                response.append(messagesJson);
 
             } catch (DataAccessException e) {
                 response = new StringBuilder("Error querying messages from request init:" + request.getInitiator()
                         + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
 
-                throw new RuntimeException(e);
             }
 
         } else {
@@ -141,7 +139,7 @@ public class DirectMessageConsumerService {
 
 
     @RabbitListener(queues = "${sendMessage.queue}")
-    public void sendMsg(MessageRequest request) throws IOException, InterruptedException {
+    public void sendMsg(MessageRequest request) throws IOException {
         String correlationID = request.getCorrelationID();
 
         StringBuilder response;
@@ -192,7 +190,6 @@ public class DirectMessageConsumerService {
      * @param request to requeue if the correlationID is not in the Websocket registry.
      * @param correlationID to find the Websocket session in the registry.
      * @param response to send back to the individual Websocket.
-     * @throws IOException
      */
     private void sendResponseIfInRegistry(Request request, String correlationID, StringBuilder response) throws IOException {
         if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {

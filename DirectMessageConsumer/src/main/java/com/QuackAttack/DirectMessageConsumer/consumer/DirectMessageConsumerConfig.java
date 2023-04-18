@@ -52,11 +52,10 @@ public class DirectMessageConsumerConfig {
         return new Jackson2JsonMessageConverter();
     }
 
+
     @Bean
     public ObjectMapper objectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        // Configure Jackson settings here, such as date format, etc.
-        return objectMapper;
+        return new ObjectMapper();
     }
 
     @Bean
