@@ -4,7 +4,6 @@ import com.QuackAttack.DirectMessageProducer.objects.CreateConversationRequest;
 import com.QuackAttack.DirectMessageProducer.objects.GetConversationRequest;
 import com.QuackAttack.DirectMessageProducer.objects.MessageRequest;
 import com.QuackAttack.DirectMessageProducer.producer.DirectMessageProducerService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,8 +13,11 @@ import java.util.UUID; // Import UUID for generating correlation ID
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class IndexController {
 
-    @Autowired
-    private DirectMessageProducerService producerService;
+    private final DirectMessageProducerService producerService;
+
+    public IndexController(DirectMessageProducerService producerService) {
+        this.producerService = producerService;
+    }
 
     /**
      * Sends a get conversation request to its message queue.
@@ -23,7 +25,7 @@ public class IndexController {
      * @return ResponseEntity with correlation ID as a response header
      */
     @GetMapping("/getConvo")
-    public ResponseEntity sendGetConversation(@RequestHeader String initiator,
+    public ResponseEntity<String> sendGetConversation(@RequestHeader String initiator,
                                               @RequestHeader String receiver,
                                               @RequestHeader int conversationID) {
         try {
@@ -50,7 +52,7 @@ public class IndexController {
      * @return ResponseEntity with correlation ID as a response header
      */
     @PostMapping("/createConvo")
-    public ResponseEntity sendCreateConversation(@RequestBody CreateConversationRequest request) {
+    public ResponseEntity<String> sendCreateConversation(@RequestBody CreateConversationRequest request) {
         try {
             String correlationId = generateCorrelationId(); // Generate correlation ID
             request.setCorrelationID(correlationId);
@@ -58,7 +60,7 @@ public class IndexController {
 //
 //            System.out.println(correlationId);
             producerService.addCreateConversationQueue(request); // Pass correlation ID to producer service
-            System.out.println(request.toString());
+            System.out.println(request);
 
             return ResponseEntity.ok().body(correlationId);
 
@@ -74,7 +76,7 @@ public class IndexController {
      * @return ResponseEntity with correlation ID as a response header
      */
     @PostMapping("/sendMsg")
-    public ResponseEntity sendMessageRequest(@RequestBody MessageRequest request) {
+    public ResponseEntity<String> sendMessageRequest(@RequestBody MessageRequest request) {
         try {
             String correlationId = generateCorrelationId(); // Generate correlation ID
             request.setCorrelationID(correlationId); // Put correlationID into request
