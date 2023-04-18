@@ -77,11 +77,10 @@ public class IndexController {
     public ResponseEntity sendMessageRequest(@RequestBody MessageRequest request) {
         try {
             String correlationId = generateCorrelationId(); // Generate correlation ID
-
+            request.setCorrelationID(correlationId); // Put correlationID into request
             producerService.addMsgRequestQueue(request); // Pass correlation ID to producer service
             return ResponseEntity.ok().body(correlationId);
         } catch (Exception e) {
-            System.out.println("Failed in requesting the timeline: " + e);
             return ResponseEntity.internalServerError().build();
         }
     }

@@ -144,6 +144,19 @@ public class DirectMessageConsumerService {
 
         StringBuilder response;
 
+        // Get the conversation ID for the message
+        String sqlgetConvoID = "SELECT convoID FROM conversations WHERE " +
+                "(UserInitiator = ? OR UserReceiver = ?) OR (UserReceiver = ? OR UserInitiator = ?) ";
+
+        try {
+            List<Integer> convoIds = jdbcTemplate.queryForList(sqlgetConvoID, Integer.class,
+                    request.getSender(), request.getReceiver(), request.getReceiver(), request.getSender());
+            request.setConvoID(convoIds.get(0));
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Add message with the correct conversation ID
         String sql = "INSERT INTO messages (convoID, sender, receiver, message) VALUES ( ?, ?, ?, ?)";
 
         try {

@@ -3,6 +3,20 @@ package com.QuackAttack.DirectMessageProducer.objects;
 
 public class MessageRequest implements Request{
 
+
+    public String getCorrelationID() {
+        return correlationID;
+    }
+
+    public void setCorrelationID(String correlationID) {
+        this.correlationID = correlationID;
+    }
+
+    private String correlationID;
+    private int convoID;
+    private String sender;
+    private String receiver;
+    private String message;
     public String getSender() {
         return sender;
     }
@@ -32,9 +46,4 @@ public class MessageRequest implements Request{
         this.message = message;
     }
 
-    private String correlationID;
-    private int convoID;
-    private String sender;
-    private String receiver;
-    private String message;
 }
