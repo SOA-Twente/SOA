@@ -47,9 +47,29 @@ public class MessageRequest implements Request{
         this.correlationID = correlationID;
     }
 
+    public boolean isRequeued() {
+        return requeued;
+    }
+
+    public void setRequeued(boolean requeued) {
+        this.requeued = requeued;
+    }
+
     private String correlationID;
     private int convoID;
     private String sender;
     private String receiver;
     private String message;
+    private boolean requeued;
+
+    public String getResponse() {
+        return response;
+    }
+
+    public void setResponse(String response) {
+        this.response = response;
+    }
+
+    private String response;
+
 }

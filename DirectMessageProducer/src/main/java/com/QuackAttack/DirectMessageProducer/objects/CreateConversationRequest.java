@@ -5,6 +5,17 @@ public class CreateConversationRequest implements Request {
     private String initiator;
     private String receiver;
     private int convoID;
+    private boolean requeued;
+
+    public String getResponse() {
+        return response;
+    }
+
+    public void setResponse(String response) {
+        this.response = response;
+    }
+
+    private String response;
     public int getConvoID() {
         return convoID;
     }
@@ -35,6 +46,14 @@ public class CreateConversationRequest implements Request {
 
     public void setCorrelationID(String correlationID) {
         this.correlationID = correlationID;
+    }
+
+    public boolean isRequeued() {
+        return requeued;
+    }
+
+    public void setRequeued(boolean requeued) {
+        this.requeued = requeued;
     }
 
 }

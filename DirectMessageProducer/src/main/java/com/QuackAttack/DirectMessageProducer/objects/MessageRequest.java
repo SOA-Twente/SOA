@@ -17,6 +17,17 @@ public class MessageRequest implements Request{
     private String sender;
     private String receiver;
     private String message;
+    private boolean requeued;
+
+    public String getResponse() {
+        return response;
+    }
+
+    public void setResponse(String response) {
+        this.response = response;
+    }
+
+    private String response;
     public String getSender() {
         return sender;
     }
@@ -45,5 +56,14 @@ public class MessageRequest implements Request{
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public boolean isRequeued() {
+        return requeued;
+    }
+
+    public void setRequeued(boolean requeued) {
+        this.requeued = requeued;
+    }
+
 
 }

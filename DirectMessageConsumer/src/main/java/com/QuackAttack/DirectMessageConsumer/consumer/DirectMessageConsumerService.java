@@ -61,31 +61,42 @@ public class DirectMessageConsumerService {
 
         String correlationID = request.getCorrelationID();
 
-        StringBuilder response;
+        StringBuilder response = null;
+        if (!request.isRequeued()) {
+            try {
+                // create a conversation with the request values, but first check if the conversation exists
+                List<Conversation> conversations = doesConvoExists(request);
 
-        // create a conversation with the request values, but first check if the conversation exists
-        List<Conversation> conversations = doesConvoExists(request);
+                // if the conversation does not exist, create a new entry with request values
+                if (conversations.size() == 0) {
+                    System.out.println("Conversation does not exist, creating new conversation");
+                    String sql = "INSERT INTO conversations (UserInitiator, UserReceiver) VALUES (?, ?)";
+                    Object[] params = {request.getInitiator(), request.getReceiver()};
+                    int rows = jdbcTemplate.update(sql, params);
 
-        // if the conversation does not exist, create a new entry with request values
-        if (conversations.size() == 0) {
-            System.out.println("Conversation does not exist, creating new conversation");
-            String sql = "INSERT INTO conversations (UserInitiator, UserReceiver) VALUES (?, ?)";
-            Object[] params = {request.getInitiator(), request.getReceiver()};
-            int rows = jdbcTemplate.update(sql, params);
+                    if (rows > 0) {
+                        response = new StringBuilder("A new conversation has been created");
+                    } else {
+                        response = new StringBuilder("An error in creating a conversation occurred");
+                    }
 
-            if (rows > 0) {
-                response = new StringBuilder("A new conversation has been created");
-            } else {
-                response = new StringBuilder("An error in creating a conversation occurred");
+                } else {
+                    response = new StringBuilder("Conversation already exists.");
+                }
+
+
+            } catch (DataAccessException e) {
+                response = new StringBuilder("An error in accessing the database");
             }
+            request.setResponse(String.valueOf(response));
 
-        } else {
-            response = new StringBuilder("Conversation already exists.");
         }
+        
 
         sendResponseIfInRegistry(request, correlationID, response);
 
     }
+        
 
 
 
@@ -103,35 +114,40 @@ public class DirectMessageConsumerService {
         System.out.println("get convo consumer first part");
         System.out.println("In registry: "  + MyWebSocketHandler.getRegistry().containsKey(correlationID));
 
-        StringBuilder response;
+        StringBuilder response = null;
         List<Conversation> conversations = doesConvoExists(request);
 
-        if (conversations.size() > 0) {
-            // return list of messages from the messages table
-            int conversationID = conversations.get(0).getConvoID();
+        if (!request.isRequeued()) {
+            if (conversations.size() > 0) {
+                // return list of messages from the messages table
+                int conversationID = conversations.get(0).getConvoID();
 
-            String sql = "SELECT * FROM messages WHERE convoID = ?";
+                String sql = "SELECT * FROM messages WHERE convoID = ?";
 
-            try {
-                List<Message> messages = jdbcTemplate.query(sql
-                        , BeanPropertyRowMapper.newInstance(Message.class)
-                        , conversationID);
+                try {
+                    List<Message> messages = jdbcTemplate.query(sql
+                            , BeanPropertyRowMapper.newInstance(Message.class)
+                            , conversationID);
 
-                String messagesJson = toJson(messages);
+                    String messagesJson = toJson(messages);
 
-                response = new StringBuilder();
-                response.append(messagesJson);
+                    response = new StringBuilder();
+                    response.append(messagesJson);
 
-            } catch (DataAccessException e) {
-                response = new StringBuilder("Error querying messages from request init:" + request.getInitiator()
-                        + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
+                } catch (DataAccessException e) {
+                    response = new StringBuilder("Error querying messages from request init:" + request.getInitiator()
+                            + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
+
+                }
+                request.setResponse(String.valueOf(response));
+
+            } else {
+                response = new StringBuilder("Conversation does not yet exist, please first make a conversation");
 
             }
-
-        } else {
-            response = new StringBuilder("Conversation does not yet exist, please first make a conversation");
-
+            request.setResponse(String.valueOf(response));
         }
+        
 
         sendResponseIfInRegistry(request, correlationID, response);
     }
@@ -142,42 +158,46 @@ public class DirectMessageConsumerService {
     public void sendMsg(MessageRequest request) throws IOException {
         String correlationID = request.getCorrelationID();
 
-        StringBuilder response;
+        StringBuilder response = null;
 
         // Get the conversation ID for the message
         String sqlgetConvoID = "SELECT convoID FROM conversations WHERE " +
                 "(UserInitiator = ? OR UserReceiver = ?) OR (UserReceiver = ? OR UserInitiator = ?) ";
 
-        try {
-            List<Integer> convoIds = jdbcTemplate.queryForList(sqlgetConvoID, Integer.class,
-                    request.getSender(), request.getReceiver(), request.getReceiver(), request.getSender());
-            request.setConvoID(convoIds.get(0));
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
-        }
-
-        // Add message with the correct conversation ID
-        String sql = "INSERT INTO messages (convoID, sender, receiver, message) VALUES ( ?, ?, ?, ?)";
-
-        try {
-            int rows = jdbcTemplate.update(sql, request.getConvoID(), request.getSender(), request.getReceiver(), request.getMessage());
-            if (rows > 0) {
-                // message was send successfully
-                System.out.println("message was sent");
-                response = new StringBuilder("message was sent");
-
-            } else {
-                response = new StringBuilder("message was not sent, error location is direct quack");
+        if (!request.isRequeued()) {
+            try {
+                List<Integer> convoIds = jdbcTemplate.queryForList(sqlgetConvoID, Integer.class,
+                        request.getSender(), request.getReceiver(), request.getReceiver(), request.getSender());
+                request.setConvoID(convoIds.get(0));
+            } catch (DataAccessException e) {
+                throw new RuntimeException(e);
             }
 
-        } catch (DataAccessException e) {
-            System.out.println();
-            response = new StringBuilder(
-                    "Error sending the message for request: " + request.getReceiver() +
-                            ", sender: " + request.getSender() +
-                            ", receiver: " + request.getReceiver() +
-                            ", message : " + request.getMessage());
-        }
+            // Add message with the correct conversation ID
+            String sql = "INSERT INTO messages (convoID, sender, receiver, message) VALUES ( ?, ?, ?, ?)";
+
+            try {
+                int rows = jdbcTemplate.update(sql, request.getConvoID(), request.getSender(), request.getReceiver(), request.getMessage());
+                if (rows > 0) {
+                    // message was send successfully
+                    System.out.println("message was sent");
+                    response = new StringBuilder("message was sent");
+
+                } else {
+                    response = new StringBuilder("message was not sent, error location is direct quack");
+                }
+
+            } catch (DataAccessException e) {
+                System.out.println();
+                response = new StringBuilder(
+                        "Error sending the message for request: " + request.getReceiver() +
+                                ", sender: " + request.getSender() +
+                                ", receiver: " + request.getReceiver() +
+                                ", message : " + request.getMessage());
+            }
+
+            request.setResponse(String.valueOf(response));
+        } 
 
         sendResponseIfInRegistry(request, correlationID, response);
 
@@ -207,10 +227,18 @@ public class DirectMessageConsumerService {
     private void sendResponseIfInRegistry(Request request, String correlationID, StringBuilder response) throws IOException {
         if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
             WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
-            session.sendMessage(new TextMessage("Confirmation:" + response));
-            System.out.println("Confirmation:" + response);
+            if (request.isRequeued()) {
+                session.sendMessage(new TextMessage("Confirmation:" + request.getResponse()));
+                System.out.println("Confirmation:" + request.getResponse());
+
+            } else {
+                session.sendMessage(new TextMessage("Confirmation:" + response));
+                System.out.println("Confirmation:" + response);
+
+            }
 
         } else {
+            request.setRequeued(true);
             System.out.println("requeue");
             requeueRequest(request);
         }
