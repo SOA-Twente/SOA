@@ -87,7 +87,8 @@ public class DirectMessageConsumerService {
             response = new StringBuilder("Conversation already exists.");
         }
 
-        // addToResultBuffer(request, correlationID, response);
+        sendResponseIfInRegistry(request, correlationID, response);
+
     }
 
 
@@ -140,14 +141,6 @@ public class DirectMessageConsumerService {
 
         }
 
-        System.out.println("response: " + response);
-        /*
-
-        System.out.println("consumer second part");
-        System.out.println("In registry: "  + MyWebSocketHandler.getRegistry().containsKey(correlationID));
-        addToResultBuffer(request, correlationID, response);
-        */
-
         sendResponseIfInRegistry(request, correlationID, response);
     }
 
@@ -181,7 +174,7 @@ public class DirectMessageConsumerService {
                             ", message : " + request.getMessage());
         }
 
-
+        sendResponseIfInRegistry(request, correlationID, response);
 
     }
 
@@ -207,7 +200,7 @@ public class DirectMessageConsumerService {
      * @param response to send back to the individual Websocket.
      * @throws IOException
      */
-    private void sendResponseIfInRegistry(GetConversationRequest request, String correlationID, StringBuilder response) throws IOException {
+    private void sendResponseIfInRegistry(Request request, String correlationID, StringBuilder response) throws IOException {
         if (MyWebSocketHandler.getRegistry().containsKey(correlationID)) {
             WebSocketSession session = MyWebSocketHandler.getRegistry().get(correlationID);
             session.sendMessage(new TextMessage("Confirmation:" + response));
