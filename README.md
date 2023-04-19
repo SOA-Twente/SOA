@@ -8,7 +8,14 @@ Make a Twitter clone based on MicroServices called QuackAttack
 
 # The different apps
 
-
+- SearchApp: Responsible for searching users and messages
+- ProfileApp: Keep track of personal information of profile page
+- TimelineApp: To return personalized timelines
+- FollowApp: To (un)follow users and get follow information
+- PostmessageApp: To pose messages and get messages by username, content or ID
+- DirectMessageConsumer and DirectMessageProducer: Create conversation, get conversation, send messages
+- RegisterApp: Keep track of the registered users and sign-up for users.
+- Client: Our feign client implementation for a few services.
 
 # Important considerations
 
@@ -26,7 +33,7 @@ Make sure you have minikube installed. Start minikube with `minikube start`.
 
 Now go in the folder ./kubernetes and execute the `scriptDB.bat`, this will create all the database deployments necessary together with their storage claims and services. Once all the DB's are running, use `createTable.bat` in order to create all the tables in the specific pods automatically. You can make sure the tables exist by running the `getInfoScript.bat` which should print the tables of every DB.
 
-Now run the `scriptServices.bat` to create deployments for all the services. You can use `minikube dashboard --url` in the command line to show the url of the kubernetes cluster dashboard where you can monitor any problems.
+Now run the `scriptServices.bat` to create deployments for all the services. This will take quite some time as it will also copy the docker images to a local storage element for minikube. You can use `minikube dashboard --url` in the command line to show the url of the kubernetes cluster dashboard where you can monitor any problems.
 
 Now install rabbitMQ operator with `kubectl apply -f "https://github.com/rabbitmq/cluster-operator/releases/latest/download/cluster-operator.yml"` and then the cluster with the two commands `kubectl config set-context --current --namespace=production` which will set our current namespace in the command line and `kubectl apply -f https://raw.githubusercontent.com/rabbitmq/cluster-operator/main/docs/examples/hello-world/rabbitmq.yaml`. Please use the RabbitMQ tutorial for any extra information as to how to login and show the dashboard (https://www.rabbitmq.com/kubernetes/operator/quickstart-operator.html).
 
