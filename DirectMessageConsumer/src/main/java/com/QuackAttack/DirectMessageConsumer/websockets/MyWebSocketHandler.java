@@ -1,5 +1,7 @@
 package com.QuackAttack.DirectMessageConsumer.websockets;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 
@@ -11,10 +13,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component("myWebSocketHandler")
 public class MyWebSocketHandler implements WebSocketHandler {
 
+    Logger logger = LoggerFactory.getLogger(MyWebSocketHandler.class);
     public static ConcurrentHashMap<String, WebSocketSession> getRegistry() {
         return registry;
     }
-
     private static final ConcurrentHashMap<String, WebSocketSession> registry = new ConcurrentHashMap<>();
 
 
@@ -23,8 +25,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
         String correlationID = Objects.requireNonNull(session.getUri()).getPath().split("/")[3]; // extract correlationId from WebSocket URL
 
         registry.put(correlationID, session);
-        System.out.println("last registry entry:" + correlationID);
-        System.out.println("registry: " + registry);
+        logger.info("Last registry entry: " + correlationID);
+        logger.info("Current registry: " + registry);
     }
 
     @Override
@@ -33,12 +35,13 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
         if (receivedMessage.startsWith("received")) {
             String correlationID = Objects.requireNonNull(session.getUri()).getPath().split("/")[3]; // extract correlationId from WebSocket URL
-            System.out.println("correlationID found from path by server side: " + correlationID);
+            logger.info("CorrelationID found from path by server side: " + correlationID);
             registry.remove(correlationID, session);
+            logger.info("CorrelationID removed: " + correlationID);
             System.out.println("CorrelationID removed: " + correlationID);
 
             try {
-                System.out.println("Closing session for correlationID: " + correlationID);
+                logger.info("Closing session for correlationID: " + correlationID);
                 session.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -49,14 +52,12 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        // Handle WebSocket transport error
-        // ...
+        logger.error("Transport error in session: " + session.getId());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) {
-        // Handle WebSocket connection closure
-
+        logger.info("Closed session: " + session.getId());
     }
 
     @Override
