@@ -4,6 +4,8 @@ import com.QuackAttack.DirectMessageConsumer.objects.*;
 import com.QuackAttack.DirectMessageConsumer.websockets.MyWebSocketHandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -29,6 +31,7 @@ import java.util.List;
 @Order(2)
 @DependsOn("myWebSocketHandler")
 public class DirectMessageConsumerService {
+    Logger logger = LoggerFactory.getLogger(DirectMessageConsumerService.class);
     private final JdbcTemplate jdbcTemplate;
     private final RabbitTemplate rabbitTemplate;
 
@@ -55,10 +58,10 @@ public class DirectMessageConsumerService {
      */
     @RabbitListener(queues = "${createConversation.queue}")
     public void createConvo(CreateConversationRequest request) throws IOException {
-        System.out.println("create convo first part");
         System.out.println(request.getReceiver() + ":" + request.getInitiator());
-
         String correlationID = request.getCorrelationID();
+
+        logger.info("CorrelationID:" + correlationID + ", CreateConversation Consumer");
 
         StringBuilder response = null;
         if (!request.isRequeued()) {
@@ -68,24 +71,28 @@ public class DirectMessageConsumerService {
 
                 // if the conversation does not exist, create a new entry with request values
                 if (conversations.size() == 0) {
-                    System.out.println("Conversation does not exist, creating new conversation");
+                    logger.error("CorrelationID:" + correlationID + ", conversation does not exist, creating new conversation");
                     String sql = "INSERT INTO conversations (UserInitiator, UserReceiver) VALUES (?, ?)";
                     Object[] params = {request.getInitiator(), request.getReceiver()};
                     int rows = jdbcTemplate.update(sql, params);
 
                     if (rows > 0) {
                         response = new StringBuilder("A new conversation has been created");
+                        logger.info("CorrelationID:" + correlationID + "," + response.toString());
                     } else {
                         response = new StringBuilder("An error in creating a conversation occurred");
+                        logger.info("CorrelationID:" + correlationID + "," + response.toString());
                     }
 
                 } else {
                     response = new StringBuilder("Conversation already exists.");
+                    logger.info("CorrelationID:" + correlationID + "," + response.toString());
                 }
 
 
             } catch (DataAccessException e) {
                 response = new StringBuilder("An error in accessing the database");
+                logger.info("CorrelationID:" + correlationID + "," + response.toString());
             }
             request.setResponse(String.valueOf(response));
 
@@ -110,9 +117,7 @@ public class DirectMessageConsumerService {
     public void getConvo(GetConversationRequest request) throws IOException {
 
         String correlationID = request.getCorrelationID();
-        System.out.println("get convo consumer first part");
-        System.out.println("In registry: "  + MyWebSocketHandler.getRegistry().containsKey(correlationID));
-
+        logger.info("CorrelationID:" + correlationID + ", consumed by getConvo");
         StringBuilder response = null;
         List<Conversation> conversations = doesConvoExists(request);
 
@@ -132,17 +137,18 @@ public class DirectMessageConsumerService {
 
                     response = new StringBuilder();
                     response.append(messagesJson);
+                    logger.info("CorrelationID:" + correlationID + "," + "successfully gotten the conversation");
 
                 } catch (DataAccessException e) {
                     response = new StringBuilder("Error querying messages from request init:" + request.getInitiator()
                             + ", receiver: " + request.getReceiver() + " and convoID: " + conversationID);
-
+                    logger.info("CorrelationID:" + correlationID + "," + response.toString());
                 }
                 request.setResponse(String.valueOf(response));
 
             } else {
                 response = new StringBuilder("Conversation does not yet exist, please first make a conversation");
-
+                logger.info("CorrelationID:" + correlationID + "," + response.toString());
             }
             request.setResponse(String.valueOf(response));
         }
@@ -156,7 +162,7 @@ public class DirectMessageConsumerService {
     @RabbitListener(queues = "${sendMessage.queue}")
     public void sendMsg(MessageRequest request) throws IOException {
         String correlationID = request.getCorrelationID();
-
+        logger.info("CorrelationID:" + correlationID + ", consumed by sendMsg");
         StringBuilder response = null;
 
         // Get the conversation ID for the message
@@ -178,21 +184,22 @@ public class DirectMessageConsumerService {
             try {
                 int rows = jdbcTemplate.update(sql, request.getConvoID(), request.getSender(), request.getReceiver(), request.getMessage());
                 if (rows > 0) {
-                    // message was send successfully
-                    System.out.println("message was sent");
                     response = new StringBuilder("message was sent");
+                    logger.info("CorrelationID:" + correlationID + "," + response.toString());
 
                 } else {
                     response = new StringBuilder("message was not sent, error location is direct quack");
+                    logger.info("CorrelationID:" + correlationID + "," + response.toString());
                 }
 
             } catch (DataAccessException e) {
-                System.out.println();
                 response = new StringBuilder(
                         "Error sending the message for request: " + request.getReceiver() +
                                 ", sender: " + request.getSender() +
                                 ", receiver: " + request.getReceiver() +
                                 ", message : " + request.getMessage());
+                logger.info("CorrelationID:" + correlationID + "," + response.toString());
+
             }
 
             request.setResponse(String.valueOf(response));
@@ -230,6 +237,7 @@ public class DirectMessageConsumerService {
                 session.sendMessage(new TextMessage("Confirmation:" + request.getResponse()));
                 System.out.println("Confirmation:" + request.getResponse());
 
+
             } else {
                 session.sendMessage(new TextMessage("Confirmation:" + response));
                 System.out.println("Confirmation:" + response);
@@ -238,7 +246,7 @@ public class DirectMessageConsumerService {
 
         } else {
             request.setRequeued(true);
-            System.out.println("requeue");
+            logger.info("CorrelationID: " + correlationID + ", requeued because not in the registry");
             requeueRequest(request);
         }
     }
@@ -257,21 +265,16 @@ public class DirectMessageConsumerService {
         messageProperties.setContentType("application/json");
 
         org.springframework.amqp.core.Message message = new org.springframework.amqp.core.Message(jsonPayload.getBytes(), messageProperties);
-        System.out.println("in requeue method, before check");
 
         if (request instanceof CreateConversationRequest) {
-            System.out.println("in requeue method, in check");
             rabbitTemplate.convertAndSend(createConversationQueue, message);
 
         } else if (request instanceof GetConversationRequest) {
-            System.out.println("in requeue method, in check");
             rabbitTemplate.convertAndSend(getConversationQueue, message);
         } else {
             System.out.println("in requeue method, in check");
             rabbitTemplate.convertAndSend(sendMessageQueue, message);
         }
-        System.out.println("in requeue method, after check");
-
     }
 
 

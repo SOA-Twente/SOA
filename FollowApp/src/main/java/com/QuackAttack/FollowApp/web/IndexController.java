@@ -33,7 +33,7 @@ public class IndexController {
      * @param following Following object, id, user_id and following_id
      * @return request failure or success
      */
-    @PostMapping("/unfollow")
+    @DeleteMapping("/unfollow")
     public ResponseEntity<String> unfollowUser(@CookieValue String credentials,@RequestBody Following following) {
 
         String user_id;
