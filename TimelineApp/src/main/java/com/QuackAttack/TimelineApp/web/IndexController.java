@@ -3,12 +3,8 @@ package com.QuackAttack.TimelineApp.web;
 import com.QuackAttack.TimelineApp.auth.TokenVerifier;
 import com.QuackAttack.TimelineApp.objects.Following;
 import com.QuackAttack.TimelineApp.objects.Quack;
-import com.QuackAttack.TimelineApp.objects.RequestFollowingForm;
-import com.QuackAttack.TimelineApp.objects.RequestTimelineForm;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -33,16 +28,20 @@ public class IndexController {
     private static final String GET_QUACKS = "http://localhost:8081/getQuacksByUsername/";
     private static final int TIMELINE_MAX_SIZE = 50;
 
-    @Autowired
+    final
     RestTemplate restTemplate;
 
-    @Autowired
-    private TokenVerifier verifier;
+    private final TokenVerifier verifier;
+
+    public IndexController(RestTemplate restTemplate, TokenVerifier verifier) {
+        this.restTemplate = restTemplate;
+        this.verifier = verifier;
+    }
 
     @GetMapping("/timeline")
     public ResponseEntity<List<Quack>> timeline(@CookieValue String credentials) {
 
-        String username = null;
+        String username;
         try {
             username = verifier.checkToken(credentials);
         } catch (GeneralSecurityException | IOException e) {
@@ -60,7 +59,7 @@ public class IndexController {
                 GET_FOLLOWING,
                 HttpMethod.GET,
                 new HttpEntity<>(null, headers),
-                new ParameterizedTypeReference<List<Following>>() {
+                new ParameterizedTypeReference<>() {
                 });
 
         List<Following> followings = response.getBody();
@@ -69,6 +68,7 @@ public class IndexController {
         List<Quack> quacks = new ArrayList<>();
 
         logger.info("Getting quacks for following of " + username);
+        assert followings != null;
         for (Following following : followings) {
             try {
                 // GET to post a message service to retrieve the quacks per following
@@ -76,11 +76,13 @@ public class IndexController {
                         GET_QUACKS + following.getUser_id(),
                         HttpMethod.GET,
                         null,
-                        new ParameterizedTypeReference<List<Quack>>() {}
+                        new ParameterizedTypeReference<>() {
+                        }
                 );
 
 
                 List<Quack> followingQuack = responseQuacks.getBody();
+                assert followingQuack != null;
                 quacks.addAll(followingQuack);
             } catch (RestClientException e) {
                 logger.error("Error in getting following for userID" + following.getUser_id());
@@ -91,7 +93,7 @@ public class IndexController {
 
 
         // construct timeline, most recent sort (createdAt)
-        Collections.sort(quacks, Comparator.comparing(Quack::getCreated_at).reversed());
+        quacks.sort(Comparator.comparing(Quack::getCreated_at).reversed());
         List<Quack> timeline = quacks.subList(0, Math.min(quacks.size(), TIMELINE_MAX_SIZE));
         logger.info("Returning for timeline of " + username);
         return ResponseEntity.ok().body(timeline);
