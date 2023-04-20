@@ -15,7 +15,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.sql.SQLException;
 import java.util.List;
 
 import static com.soa.demo.security.GTokenVerify.checkToken;
@@ -47,7 +46,7 @@ public class indexController {
         return "Hello World";
     }
 
-    record userDataRecord(int id, String username, String description, int followers, int following, String tags) {};
+    record userDataRecord(int id, String username, String description, int followers, int following, String tags) {}
 
     /**
      * Returns a list of user data for a specific user
@@ -63,7 +62,7 @@ public class indexController {
                 BeanPropertyRowMapper.newInstance(UserData.class), username);
 
 
-        return new userDataRecord(userData.getId(), userData.getUsername(), userData.getDescription(), userData.getFollowers(), userData.getFollowing(), userData.getTags());
+       return new userDataRecord(userData.getId(), userData.getUsername(), userData.getDescription(), userData.getFollowers(), userData.getFollowing(), userData.getTags());
     }
 
     /**
