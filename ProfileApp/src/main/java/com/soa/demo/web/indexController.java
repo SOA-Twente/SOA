@@ -4,9 +4,8 @@ import com.QuackAttack.RegisterApp.UserProfile;
 import com.soa.demo.auth.TokenVerifier;
 import com.soa.demo.objects.Message;
 import com.soa.demo.objects.UserData;
-import org.apache.catalina.User;
-import org.postgresql.jdbc.PgArray;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.ui.Model;
@@ -17,7 +16,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.soa.demo.security.GTokenVerify.checkToken;
@@ -26,12 +24,15 @@ import static com.soa.demo.security.GTokenVerify.checkToken;
 @RestController
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class indexController {
+    Logger logger = LoggerFactory.getLogger(indexController.class);
+    private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final TokenVerifier verifier;
 
-    @Autowired
-    private TokenVerifier verifier;
+    public indexController(JdbcTemplate jdbcTemplate, TokenVerifier verifier) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.verifier = verifier;
+    }
 
     //Example of how to handle JWT. This is how you would get the user email from the JWT
     @GetMapping("/")
@@ -39,9 +40,7 @@ public class indexController {
         System.out.println(credentials);
         try {
             System.out.println(checkToken(credentials));
-        } catch (GeneralSecurityException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (GeneralSecurityException | IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -55,10 +54,9 @@ public class indexController {
      * @param model the model
      * @param username the username of the user
      * @return a list of user data for a specific user
-     * @throws SQLException
      */
     @GetMapping("/getUserData/{username}")
-    public userDataRecord getUserData(Model model, @PathVariable String username) throws SQLException {
+    public userDataRecord getUserData(Model model, @PathVariable String username) {
         String sql = "SELECT * FROM userdata WHERE LOWER(username) = LOWER(?)";
 
         UserData userData = jdbcTemplate.queryForObject(sql,
@@ -94,11 +92,11 @@ public class indexController {
         int rows = jdbcTemplate.update(sql, message.getId());
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted for user: " + message.getUsername());
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
+            logger.error("Something went wrong creating a row for user: " + message.getUsername());
         }
         return 0;
     }
@@ -116,11 +114,11 @@ public class indexController {
         int rows = jdbcTemplate.update(sql, message.getId());
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted for user: " + message.getUsername() + " in addFollower.");
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
+            logger.error("Something went wrong creating a row for user: " + message.getUsername() + " in addFollower.");
         }
         return 0;
         //Add follower to userdata
@@ -159,11 +157,11 @@ public class indexController {
         int rows = jdbcTemplate.update(sql, tagInput, username);
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted for user: " + username + " in addTag.") ;
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
+            logger.error("Something went wrong creating a row for user: " + username + " in addTag.");
         }
         return ResponseEntity.ok(message);
     }
@@ -193,11 +191,11 @@ public class indexController {
         int rows = jdbcTemplate.update(sql, message.getDescription(), username);
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted for user: " + username + " in add Description.") ;
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
+            logger.error("Something went wrong creating a row for user: " + username + " in add Description.");
         }
         return ResponseEntity.ok(message);
     }
@@ -223,11 +221,11 @@ public class indexController {
         int rows = jdbcTemplate.update(sql, userProfile.id(), username, 0);
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted for user: " + username + " in add user profile.") ;
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
+            logger.error("Something went wrong creating a row for user: " + username + " in add user profile.");
         }
         return ResponseEntity.ok().build();
     }

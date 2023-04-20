@@ -1,11 +1,9 @@
 package com.QuackAttack.FollowApp.web;
 
 import com.QuackAttack.FollowApp.auth.TokenVerifier;
-import com.QuackAttack.FollowApp.objects.FollowUserForm;
 import com.QuackAttack.FollowApp.objects.Following;
-import com.QuackAttack.FollowApp.objects.RequestFollowingForm;
-import com.QuackAttack.RegisterApp.Quack;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -20,11 +18,15 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class IndexController {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    Logger logger = LoggerFactory.getLogger(IndexController.class);
+    private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private TokenVerifier verifier;
+    private final TokenVerifier verifier;
+
+    public IndexController(JdbcTemplate jdbcTemplate, TokenVerifier verifier) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.verifier = verifier;
+    }
 
 
     /**
@@ -48,16 +50,15 @@ public class IndexController {
         int rows = jdbcTemplate.update(sql, following.getFollowing_id(), user_id);
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted.");
             String successMessage = "Unfollow operation successful for sender " + user_id + " to unfollow " + following.getFollowing_id();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(successMessage);
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
             String failMessage = "Unfollow operation failed for " + user_id + " to unfollow " + following.getFollowing_id();
-
+            logger.error(failMessage);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(failMessage);
         }
     }
@@ -87,16 +88,16 @@ public class IndexController {
         int rows = jdbcTemplate.update(sql, user_id, following.getFollowing_id());
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted.");
             String successMessage = "Follow operation successful for sender " + user_id + " to follow " + following.getFollowing_id();
+            logger.info(successMessage);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(successMessage);
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
             String failMessage = "Follow operation failed for " + user_id + " to follow " + following.getFollowing_id();
-
+            logger.error(failMessage);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(failMessage);
         }
     }
@@ -104,7 +105,7 @@ public class IndexController {
     /**
      * This method is used to get a list of users that the user is following
      * @param credentials JWT
-     * @return badrequest or list of users
+     * @return bad request or list of users
      */
     @GetMapping("/getFollowing")
     public List<Following> followingList(@CookieValue String credentials) {
@@ -122,6 +123,5 @@ public class IndexController {
 
         return jdbcTemplate.query(sql,
                 BeanPropertyRowMapper.newInstance(Following.class), user_id);
-
     }
 }

@@ -4,7 +4,8 @@ package com.QuackAttack.PostMessageApp.web;
 import com.QuackAttack.PostMessageApp.auth.TokenVerifier;
 import com.QuackAttack.RegisterApp.Quack;
 import com.QuackAttack.RegisterApp.SearchResultsQuack;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.ui.Model;
@@ -21,11 +22,15 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class IndexController {
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    Logger logger = LoggerFactory.getLogger(IndexController.class);
+    private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private TokenVerifier verifier;
+    private final TokenVerifier verifier;
+
+    public IndexController(JdbcTemplate jdbcTemplate, TokenVerifier verifier) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.verifier = verifier;
+    }
 
     @GetMapping("/")
     public String home(){
@@ -82,17 +87,17 @@ public class IndexController {
             return ResponseEntity.badRequest().build();
         }
 
-        System.out.println(message.toString());
+        logger.info(message.toString());
         String sql = "INSERT INTO quacks (user_id, quack, is_reply, reply_to_quack_id, is_retweet, retweet_of_quack_id) VALUES (?,?, ?, ?, ?, ?)";
 
         int rows = jdbcTemplate.update(sql, username, message.getQuack(), message.isIs_reply(), message.getReply_to_quack_id(), message.isIs_retweet(), message.getRetweet_of_quack_id());
         if (rows > 0) {
             //If row has been created
-            System.out.println("A new row has been inserted.");
+            logger.info("A new row has been inserted.");
         }
         else {
             //If row has not been created
-            System.out.println("Something went wrong.");
+            logger.error("Something went wrong posting a message.");
         }
         return ResponseEntity.ok("message");
     }
@@ -116,6 +121,8 @@ public class IndexController {
                         (String) row.get("quack"),
                         (Timestamp) row.get("created_at")))
                 .toList();
+
+        logger.info("Successfully searched and returned:" + user);
         return ResponseEntity.ok(new SearchResultsQuack(user));
     }
 
@@ -128,6 +135,7 @@ public class IndexController {
         List<Quack> replies = jdbcTemplate.query(sql2,
                 BeanPropertyRowMapper.newInstance(Quack.class), id);
         replies.add(0, originalQuack);
+        logger.info("Successfully returned: " + replies);
         return replies;
     }
 
