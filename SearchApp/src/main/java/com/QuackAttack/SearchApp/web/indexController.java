@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
@@ -21,10 +20,6 @@ import java.util.List;
 public class indexController {
 
     Logger logger = LoggerFactory.getLogger(indexController.class);
-
-//    private static final String SEARCH_USERNAME = "http://localhost:8082/searchUsername/";
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     private RegisterAppClient registerAppClient = RegisterAppClient.create();
     private PostMessageAppClient postMessageAppClient = PostMessageAppClient.create();

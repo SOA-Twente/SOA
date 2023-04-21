@@ -24,8 +24,8 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class IndexController {
     Logger logger = LoggerFactory.getLogger(IndexController.class);
-    private static final String GET_FOLLOWING = "http://localhost:8084/getFollowing";
-    private static final String GET_QUACKS = "http://localhost:8081/getQuacksByUsername/";
+    private static final String GET_FOLLOWING = "http://follow-app-sev.production:8084/getFollowing";
+    private static final String GET_QUACKS = "http://post-message-app-sev.production:8081/getQuacksByUsername/";
     private static final int TIMELINE_MAX_SIZE = 50;
 
     final
