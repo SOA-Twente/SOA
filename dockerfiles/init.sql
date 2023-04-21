@@ -1,15 +1,6 @@
 CREATE DATABASE profiledatabase;
 \c profiledatabase;
 
-CREATE TABLE userData(
-id int NOT NULL,
-username varchar(255) NOT NULL,
-description varchar(300),
-followers int,
-tags varchar(255),
-PRIMARY KEY (id)
-);
-
 CREATE TABLE followings(
 id SERIAL PRIMARY KEY,
 user_id varchar NOT NULL,

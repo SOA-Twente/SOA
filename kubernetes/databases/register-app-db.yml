@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-register-config
+  namespace: production
+  labels:
+    app: db-register
+data:
+  POSTGRES_DB: db_register
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: root
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: db-register-pv-volume
+  namespace: production
+  labels:
+    type: local
+    app: db-register
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/db-register"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: production
+  name: db-register-pv-claim
+  labels:
+    app: db-register
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-register
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db-register
+  template:
+    metadata:
+      labels:
+        app: db-register
+    spec:
+      containers:
+        - name: postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: db-register-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: db-register-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: db-register
+  namespace: production
+  labels:
+    app: db-register
+spec:
+  type: NodePort
+  ports:
+   - port: 5432
+  selector:
+   app: db-register

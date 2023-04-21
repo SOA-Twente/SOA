@@ -21,7 +21,7 @@ public interface PostMessageAppClient {
                 .client(new ApacheHttpClient())
                 .encoder(new GsonEncoder())
                 .decoder(new GsonDecoder())
-                .target(com.QuackAttack.RegisterApp.PostMessageAppClient.class, "http://localhost:8081");
+                .target(com.QuackAttack.RegisterApp.PostMessageAppClient.class, "http://post-message-app-sev.production:8081");
     }
 
     @RequestLine("GET /searchQuacks/{search}/{number}")
